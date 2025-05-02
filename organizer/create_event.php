@@ -1,6 +1,46 @@
 <?php
     require_once("organizer_auth.php");
     require_once("../php/db.php");
+
+    if (isset($_POST['submit'])) {
+       
+        $title = $_POST['title'];
+        $description = $_POST['description'];
+        $date = $_POST['date'];
+        $venue_id = $_POST['venue_id'];
+        $organizer_id = $_SESSION['user_id']; 
+    
+        
+        if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+            $imageTmp = $_FILES['image']['tmp_name'];
+            $imageName = $_FILES['image']['name'];
+            $imagePath = 'uploads/' . $imageName;
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+            $fileExtension = pathinfo($imageName, PATHINFO_EXTENSION);
+            
+            if (in_array($fileExtension, $allowedExtensions) && $_FILES['image']['size'] < 5000000) {
+                move_uploaded_file($imageTmp, $imagePath);
+            } else {
+                echo "Invalid file type or file is too large.";
+                exit();
+            }
+        } else {
+            $imagePath = null; 
+        }
+
+        $insertQuery = "INSERT INTO events (organizer_id, title, description, date, venue_id, image)
+                        VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = mysqli_prepare($conn, $insertQuery);
+        mysqli_stmt_bind_param($stmt, "isssds", $organizer_id, $title, $description, $date, $venue_id, $imagePath);
+        $result = mysqli_stmt_execute($stmt);
+
+        if($result) {
+            echo "Event Created Successfully!";
+        } else {
+            echo "Error creating event";
+        }
+    }
+
     
 ?>
 
@@ -49,7 +89,7 @@
             $venuesQuery = "SELECT * FROM venues";
             $result = mysqli_query($conn, $venuesQuery);
             while ($venue = mysqli_fetch_assoc($result)) {
-                echo "<option value='{$venue['venue_id']}'>{$venue['venue_name']}</option>";
+                echo "<option value='{$venue['id']}'>{$venue['name']}</option>";
             }
             ?>
         </select><br>

@@ -24,10 +24,31 @@
             <th> Actions </th>
         </tr>";
     while($event = mysqli_fetch_assoc($eventResults)) {
-        echo "<tr>";
-        echo "<th>".$event["title"]."</th>";
-        echo "<th>".$event["date"]."</th>";
-        echo "<th>".$event["location"]."<th";
+        echo "<div class='event'>
+        <tr>";
+        echo "<td>".htmlspecialchars($event['title'])."</td>";
+        echo "<td>".htmlspecialchars($event["date"])."</td>";
+        
+        $venueQuery = "SELECT * from venues WHERE id = ?";
+        $venueStmt = mysqli_prepare($conn, $venueQuery);
+        mysqli_stmt_bind_param($venueStmt, "i", $event['venue_id']);
+        mysqli_stmt_execute($venueStmt);
+
+        $venueResult = mysqli_stmt_get_result($venueStmt);
+        $venue = mysqli_fetch_assoc($venueResult);
+
+        echo "<td><strong>Venue:</strong> " . htmlspecialchars($venue['name']) . "</td>";
+        
+      
+        // for status
+        echo "<td>". htmlspecialchars($venue[""]) ."</td>";
+        // for actions
+        echo "<td>";
+        echo "<a href='edit_event.php?id=" . $event['id'] . "'>Edit</a> | ";
+        echo "<a href='delete_event.php?id=" . $event['id'] . "'>Delete</a>";
+        echo "</div>";
+        echo "</td>";
+
         echo "</tr>";
     }
 
