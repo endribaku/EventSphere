@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login</title>
+    </head>
+
+    <body>
+        <label for="email">Email</label>
+        <input type="email" name="emailPHP" class="emailLoginField emailField">
+        <label for="password">Password</label>
+        <input type="password" name="passwordPHP" class="passwordLoginField passwordField">
+        <input type="submit" value="Login" id="login">
+
+
+        <script
+        src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+        crossorigin="anonymous"
+        ></script>
+
+        <script>
+            function formValidation(emailField, passwordField) {
+                if(emailField !== "" && passwordField !== "") {
+                    var emailRegex = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
+                    if(emailRegex.test(emailField)) {
+                        return true;  
+                    } else {
+                        alert("Invalid email format");
+                        return false;
+                    }
+                } else {
+                    alert("Both fields are required");
+                    return false;
+                }
+            }
+
+            $("#login").on("click", function() {
+                event.preventDefault();
+                var emailField = $(".emailLoginField").val(); 
+                var passwordField = $(".passwordLoginField").val();
+                
+                console.log("Sending email:", emailField);
+                
+                if(formValidation(emailField, passwordField)) {
+                    $.ajax( {
+                        url: "php/login.php",
+                        type: "POST",
+                        data: {
+                            emailPHP: emailField,
+                            passwordPHP: passwordField
+                        },
+
+                        success: function(response) {
+                            console.log("Server Response:", response)
+                            response = response.trim();  
+                            if(response == "user") {
+                                window.location.href = "user/dashboard.php";
+                            } if(response == "organizer") {
+                                window.location.href = "organizer/dashboard.php";
+                            } 
+                            else {
+                                console.log(response);
+                            }
+                        }
+                    })
+                }
+            })
+        </script>
+
+    </body>
+</html>
+
