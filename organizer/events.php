@@ -24,8 +24,8 @@
             <th> Actions </th>
         </tr>";
     while($event = mysqli_fetch_assoc($eventResults)) {
-        echo "<div class='event'>
-        <tr>";
+        echo "
+        <tr class='event'>";
         echo "<td>".htmlspecialchars($event['title'])."</td>";
         echo "<td>".htmlspecialchars($event["date"])."</td>";
         
@@ -41,16 +41,27 @@
         
       
         // for status
-        echo "<td>". htmlspecialchars($venue[""]) ."</td>";
+        echo "<td>";
+        $today = date("Y-m-d");
+        $eventDate = $event["date"];
+        if($eventDate > $today) {
+            echo "Upcoming";
+        } else if($eventDate == $today) {
+            echo "Ongoing";
+        } else {
+            echo "Past";
+        }
+        echo "</td>";
         // for actions
         echo "<td>";
-        echo "<a href='edit_event.php?id=" . $event['id'] . "'>Edit</a> | ";
-        echo "<a href='delete_event.php?id=" . $event['id'] . "'>Delete</a>";
+        echo "<a href='update_event.php?id=" . $event['id'] . "'>Edit</a> | ";
+        echo "<a href='../events//delete.php?id=" . $event['id'] . "'>Delete</a>";
         echo "</div>";
         echo "</td>";
 
         echo "</tr>";
     }
+    echo "</table>";
 
     
 ?>
