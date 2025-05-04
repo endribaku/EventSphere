@@ -14,12 +14,17 @@
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
             $imageTmp = $_FILES['image']['tmp_name'];
             $imageName = $_FILES['image']['name'];
-            $imagePath = 'uploads/' . $imageName;
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
             $fileExtension = pathinfo($imageName, PATHINFO_EXTENSION);
             
+            $imagePath = '../images/events/' . $imageName;
+
+            if (!is_dir('../images/events')) {
+                mkdir('../images/events', 0777, true);
+            }
+
             if (in_array($fileExtension, $allowedExtensions) && $_FILES['image']['size'] < 5000000) {
-                move_uploaded_file($imageTmp, $imagePath);
+                copy($imageTmp, $imagePath);
             } else {
                 echo "Invalid file type or file is too large.";
                 exit();

@@ -55,7 +55,7 @@
         // for actions
         echo "<td>";
         echo "<a href='update_event.php?id=" . $event['id'] . "'>Edit</a> | ";
-        echo "<a href='../events//delete.php?id=" . $event['id'] . "'>Delete</a>";
+        echo "<a href='../events/delete.php?id=" . $event['id'] . "'>Delete</a>";
         echo "</div>";
         echo "</td>";
 
