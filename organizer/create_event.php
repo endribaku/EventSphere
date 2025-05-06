@@ -9,6 +9,7 @@
         $date = $_POST['date'];
         $venue_id = $_POST['venue_id'];
         $organizer_id = $_SESSION['user_id']; 
+        $category_id = $_POST['category_id'];
     
         
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
@@ -33,10 +34,10 @@
             $imagePath = null; 
         }
 
-        $insertQuery = "INSERT INTO events (organizer_id, title, description, date, venue_id, image)
-                        VALUES (?, ?, ?, ?, ?, ?)";
+        $insertQuery = "INSERT INTO events (organizer_id, title, description, date, venue_id, image, category_id)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($conn, $insertQuery);
-        mysqli_stmt_bind_param($stmt, "isssds", $organizer_id, $title, $description, $date, $venue_id, $imagePath);
+        mysqli_stmt_bind_param($stmt, "isssdsi", $organizer_id, $title, $description, $date, $venue_id, $imagePath, $category_id);
         $result = mysqli_stmt_execute($stmt);
 
         if($result) {
@@ -57,17 +58,7 @@
     <title>Create Event</title>
 </head>
 
-<?php
-    $event_name = $_POST["event_name"];
-    $event_description = $_POST["event_description"];
-    $event_date = $_POST["event_date"];
-    $event_location = $_POST["event_location"];
 
-    $organizer_id = $_SESSION["user_id"];
-
-    $query = "INSERT INTO events (organizer_id, event_name, event_description, event_date, event_location"
-
-?>
 
 
 
@@ -101,6 +92,17 @@
 
         <label for="image">Event Image</label>
         <input type="file" name="image"><br>
+
+        <label for="category">Event Category</label>
+        <select name="category_id" id="category_id" required>
+            <?php
+            $categoryQuery = "SELECT * from event_categories";
+            $result = mysqli_query($conn, $categoryQuery);
+            while ($category = mysqli_fetch_assoc($result)) {
+                echo "<option value='{$category['id']}'>{$category['name']}</option>";
+            }
+            ?>
+        </select>
 
         <button type="submit" name="submit">Create Event</button>
     </form>

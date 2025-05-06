@@ -8,3 +8,5 @@ if (
     include_once("../php/logout.php");
     exit();
 }
+
+?>

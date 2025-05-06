@@ -20,6 +20,7 @@
             <th> Event Name </th>
             <th> Event Date </th>
             <th> Location </th>
+            <th> Category </th>
             <th> Status </th>
             <th> Actions </th>
         </tr>";
@@ -39,7 +40,17 @@
 
         echo "<td><strong>Venue:</strong> " . htmlspecialchars($venue['name']) . "</td>";
         
-      
+        // category add
+        $categoryQuery = "SELECT * from event_categories WHERE id = ?";
+        $categoryStmt = mysqli_prepare($conn, $categoryQuery);
+        mysqli_stmt_bind_param($categoryStmt, "i", $event["category_id"]);
+        mysqli_stmt_execute($categoryStmt);
+
+        $categoryResult = mysqli_stmt_get_result($categoryStmt);
+        $category = mysqli_fetch_assoc($categoryResult);
+
+        echo "<td>".htmlspecialchars($category["name"])."</td>";
+
         // for status
         echo "<td>";
         $today = date("Y-m-d");

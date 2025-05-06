@@ -64,5 +64,18 @@ $eventTime = $event["date"];
     <label for="image">Event Image (Leave blank to keep current image)</label>
     <input type="file" name="image"><br>
 
+    <label for="category">Event Category</label>
+    <select name="category" required>
+        <?php
+
+        $categoryQuery = "SELECT * FROM event_categories";
+        $categoryResult = mysqli_query($conn, $categoryQuery);
+        while ($category = mysqli_fetch_assoc($categoryResult)) {
+            $selected = ($category["id"] == $event["category_id"]) ? "selected" : "";
+            echo "<option value='{$category['id']}' {$selected}>{$category['name']}</option>";
+        }
+        ?>
+    </select>
+
     <button type="submit" name="submit">Update Event</button>
 </form>
