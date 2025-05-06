@@ -9,6 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browse Events</title>
+
 </head>
 
 
@@ -64,7 +65,7 @@
    $types = '';
 
    if(!empty($searchBar)) {
-    $filterQuery.= " AND (e.name LIKE ? OR e.description LIKE ?) ";  
+    $filterQuery .= " AND (e.title LIKE ? OR e.description LIKE ?) ";  
     $searchTerm = "%$searchBar%";
     $parameters[] = $searchTerm;
     $parameters[] = $searchTerm;
@@ -72,7 +73,7 @@
    }
 
    if(!empty($category)) {
-    $filterQuery.= " AND e.category_id = ?";
+    $filterQuery .= " AND e.category_id = ?";
     $parameters[] = $category;
     $types .= "i";
    }
@@ -81,12 +82,12 @@
    if(!empty($date_filter)) {
         switch($date_filter) {
             case "today":
-                $sql .= " AND DATE(e.date) = ?";
+                $filterQuery .= " AND e.date = ?";
                 $parameters[] = $currentDate;
                 $types .= 's';
                 break;
             case "upcoming":
-                $sql .= " AND DATE(e.date) >= ?";
+                $filterQuery .= " AND e.date >= ?";
                 $parameters[] = $currentDate;
                 $types .= 's';
                 break;
@@ -94,7 +95,7 @@
             case 'this_month':
                 $firstDayOfMonth = date('Y-m-01');
                 $lastDayOfMonth = date('Y-m-t');
-                $sql .= " AND DATE(e.date) BETWEEN ? AND ?";
+                $filterQuery .= " AND e.date BETWEEN ? AND ?";
                 $parameters[] = $firstDayOfMonth;
                 $parameters[] = $lastDayOfMonth;
                 $types .= "ss";
@@ -104,14 +105,14 @@
 
    switch ($sort) {
     case 'date_asc':
-        $sql .= " ORDER BY e.event_date ASC";
+        $filterQuery .= " ORDER BY e.date ASC";
         break;
     case 'date_desc':
-        $sql .= " ORDER BY e.event_date DESC";
+        $filterQuery .= " ORDER BY e.date DESC";
         break;
     default:
         // Default sorting (you can change this)
-        $sql .= " ORDER BY e.event_date ASC";
+        $filterQuery .= " ORDER BY e.date ASC";
         break;
     }
 
@@ -127,7 +128,7 @@
     if ($result->num_rows > 0) {
         echo '<div class="events-container">';
         while ($event = $result->fetch_assoc()) {
-            echo '<div class="event-card">';
+            echo '<div class="event-card" onclick="window.location.href='."'event_details.php?id=".$event['id']."'".'">';
             echo '<h3>' . htmlspecialchars($event['title']) . '</h3>';
             echo '<p>Category: ' . htmlspecialchars($event['category_name']) . '</p>';
             echo '<p>Date: ' . htmlspecialchars($event['date']) . '</p>';
@@ -136,11 +137,10 @@
         }
         echo '</div>';
         echo '</body>';
+        echo '</html>';
     } else {
         echo '<p>No events found matching your criteria.</p>';
     }
-    
-
 ?>
 
 
