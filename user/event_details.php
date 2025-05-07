@@ -19,7 +19,7 @@
     }
     include_once("user_header.php");
     $event_id = $_GET["id"];
-    $eventQuery = "SELECT e.*, c.name AS category_name, v.name AS venue_name, v.location AS venue_location
+    $eventQuery = "SELECT e.*, c.name AS category_name, v.name AS venue_name, v.location AS venue_location, v.capacity AS venue_capacity
                     FROM events e, event_categories c, venues v WHERE e.category_id = c.id AND e.venue_id = v.id AND e.id = ?";
     $stmt = $conn->prepare($eventQuery);
     $stmt->bind_param("i", $event_id);
@@ -45,7 +45,49 @@
     <p><strong>Location:</strong> <?php echo htmlspecialchars($event['venue_location']); ?></p>
     <p><strong>Description:</strong></p>
     <p><?php echo nl2br(htmlspecialchars($event['description'])); ?></p>
+    
+    <?php
+        $currentDate = date('Y-m-d');
 
+
+        // get capacity of bookings
+        $bookingsQuery = "SELECT COALESCE(SUM(tickets), 0) AS bookings_number FROM bookings where event_id = ?";
+        $stmt = $conn->prepare($bookingsQuery);
+        $stmt->bind_param("i", $event["id"]);
+        $stmt->execute();
+        $eventBookingsCount = $stmt->get_result();
+        $eventBookings = $eventBookingsCount->fetch_assoc();
+        
+
+        if($currentDate <= $event['date'] && $eventBookings["bookings_number"] < $event['venue_capacity']){
+            echo '<form action="../bookings/create.php" method="post">
+            <input type="hidden" name="id" value="'.$event['id'].'">
+            <label for="tickets">Number of Tickets:</label>
+            <input type="number" id="tickets" name="tickets" min="1" max="10" required>
+            <button type="submit">Book Now</button>
+             </form>';
+            echo $eventBookings["bookings_number"].' out of'.$event["venue_capacity"]." remaining.";
+        } 
+        if($currentDate > $event['date']) {
+            echo "Event finished.";
+        }
+        if($eventBookings["bookings_number"] >= $event['venue_capacity']) {
+            echo "Event capacity full.";
+        }
+
+        if($_SESSION["error"] == "Number of Tickets exceeds remaining available seats" 
+        || $_SESSION["error"] == "Booking couldn't be made successfully") {
+            echo $_SESSION["error"];
+        }
+
+        if($_SESSION["success"] == "Booking made successfully") {
+            echo $_SESSION["success"];
+        }
+
+
+
+    ?>
+    <!-- <button><a href="../bookings/create.php?id=<?php echo $event['id'];?>">Book Now</a></button> -->
     <a class="back-link" href="browse_events.php">← Back to Events</a>
 </div>
 
