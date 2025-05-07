@@ -59,33 +59,42 @@
         $eventBookings = $eventBookingsCount->fetch_assoc();
         
 
-        if($currentDate <= $event['date'] && $eventBookings["bookings_number"] < $event['venue_capacity']){
+        // check for duplicate booking
+        $checkQuery = "SELECT * FROM bookings WHERE user_id = ? AND event_id = ?";
+        $stmt = mysqli_prepare($conn, $checkQuery);
+        mysqli_stmt_bind_param($stmt, "ii", $_SESSION['user_id'], $event["id"]);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        $duplicateClause = false;
+
+        if (mysqli_num_rows($result) > 0) {
+            $duplicateClause = true;
+        } else {
+            $duplicateClause = false;
+        }
+        
+
+        if($currentDate <= $event['date'] && $eventBookings["bookings_number"] < $event['venue_capacity'] && !$duplicateClause){
             echo '<form action="../bookings/create.php" method="post">
             <input type="hidden" name="id" value="'.$event['id'].'">
             <label for="tickets">Number of Tickets:</label>
             <input type="number" id="tickets" name="tickets" min="1" max="10" required>
             <button type="submit">Book Now</button>
              </form>';
-            echo $eventBookings["bookings_number"].' out of'.$event["venue_capacity"]." remaining.";
+            
         } 
+        echo $eventBookings["bookings_number"].' out of '.$event["venue_capacity"]." remaining.";
+        
         if($currentDate > $event['date']) {
             echo "Event finished.";
         }
         if($eventBookings["bookings_number"] >= $event['venue_capacity']) {
             echo "Event capacity full.";
         }
-
-        if($_SESSION["error"] == "Number of Tickets exceeds remaining available seats" 
-        || $_SESSION["error"] == "Booking couldn't be made successfully") {
-            echo $_SESSION["error"];
+        if($duplicateClause) {
+            echo "You already booked this event";
         }
-
-        if($_SESSION["success"] == "Booking made successfully") {
-            echo $_SESSION["success"];
-        }
-
-
-
     ?>
     <!-- <button><a href="../bookings/create.php?id=<?php echo $event['id'];?>">Book Now</a></button> -->
     <a class="back-link" href="browse_events.php">← Back to Events</a>
