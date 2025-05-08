@@ -82,9 +82,8 @@
             <input type="number" id="tickets" name="tickets" min="1" max="10" required>
             <button type="submit">Book Now</button>
              </form>';
-            
-        } 
-        echo $eventBookings["bookings_number"].' out of '.$event["venue_capacity"]." remaining.";
+             echo $eventBookings["bookings_number"].' out of '.$event["venue_capacity"]." remaining.";
+        }
         
         if($currentDate > $event['date']) {
             echo "Event finished.";

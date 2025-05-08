@@ -42,7 +42,7 @@
    $sort = isset($_GET["sort"]) ? $_GET["sort"] : "ascending";
    // filter sql logic
    $bookingsQuery = "SELECT e.title AS title, e.description, e.date AS event_date, v.location AS venue_location, v.name 
-   AS venue_name, b.booking_date, e.image, b.tickets 
+   AS venue_name, b.booking_date, e.image, b.tickets, b.id AS booking_id, e.id AS event_id
    FROM bookings b, events e, venues v WHERE b.event_id = e.id 
    AND e.venue_id = v.id AND user_id = ?";
 
@@ -96,7 +96,7 @@
                     <th> Tickets </th>
                     <th> Date of Booking </th>
                     <th> Status </th>
-                    
+                    <th> Actions </th>
                 </tr>";
 
                 // will add image in future to the bookings table
@@ -120,6 +120,14 @@
                 echo "Ongoing";
             }
             echo "</td>";
+            if($row["event_date"] > $currentDate) {
+                echo "<td>";
+                echo "<a href='../bookings/cancel.php?id=" . $row['booking_id'] . '&event_id='. $row['event_id']."'>Cancel</a>";
+                echo "</td>";
+            } else {
+                echo "None";
+            }
+            
             echo "</tr>";
         }
 
