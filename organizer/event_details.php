@@ -1,6 +1,6 @@
 <?php
-    require_once("user_auth.php");
-    include_once("../php/db.php");
+    require_once("organizer_auth.php");
+    require_once("../php/db.php");
 ?>
 
 <!DOCTYPE html>
@@ -9,15 +9,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Details</title>
-
 </head>
 
-<?php
+<?php 
+    require_once("organizer_header.php");
+
     if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
         echo "Invalid event ID.";
         exit();
     }
-    include_once("user_header.php");
     $event_id = $_GET["id"];
     $eventQuery = "SELECT e.*, c.name AS category_name, v.name AS venue_name, v.location AS venue_location, v.capacity AS venue_capacity
                     FROM events e, event_categories c, venues v WHERE e.category_id = c.id AND e.venue_id = v.id AND e.id = ?";
@@ -28,7 +28,7 @@
 
     if ($event->num_rows === 0) {
         echo "Event not found.";
-        exit();
+        exit;
     }
     $event = $event->fetch_assoc();
 ?>
@@ -58,45 +58,18 @@
         $eventBookingsCount = $stmt->get_result();
         $eventBookings = $eventBookingsCount->fetch_assoc();
         
-
-        // check for duplicate booking
-        $checkQuery = "SELECT * FROM bookings WHERE user_id = ? AND event_id = ?";
-        $stmt = mysqli_prepare($conn, $checkQuery);
-        mysqli_stmt_bind_param($stmt, "ii", $_SESSION['user_id'], $event["id"]);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-
-        $duplicateClause = false;
-
-        if (mysqli_num_rows($result) > 0) {
-            $duplicateClause = true;
+        if ($currentDate > $event['date']) {
+            echo "<p style='color: red;'>Event finished.</p>";
+        } elseif ($eventBookings["bookings_number"] >= $event['venue_capacity']) {
+            echo "<p style='color: red;'>Event capacity full.</p>";
         } else {
-            $duplicateClause = false;
+            $remaining = $event['venue_capacity'] - $eventBookings["bookings_number"];
+            echo "<p style='color: green;'>$remaining seats remaining out of {$event['venue_capacity']}.</p>";
         }
-        
-
-        if($currentDate <= $event['date'] && $eventBookings["bookings_number"] < $event['venue_capacity'] && !$duplicateClause){
-            echo '<form action="../bookings/create.php" method="post">
-            <input type="hidden" name="id" value="'.$event['id'].'">
-            <label for="tickets">Number of Tickets:</label>
-            <input type="number" id="tickets" name="tickets" min="1" max="10" required>
-            <button type="submit">Book Now</button>
-             </form>';
-             echo $eventBookings["bookings_number"].' out of '.$event["venue_capacity"]." remaining.";
-        } else {
-
-            if($currentDate > $event['date']) {
-                echo "Event finished.";
-            } else if($eventBookings["bookings_number"] >= $event['venue_capacity']) {
-                echo "Event capacity full.";
-            } else if($duplicateClause) {
-                echo "You already booked this event";
-            }
-        }
-        
+       
     ?>
     <!-- <button><a href="../bookings/create.php?id=<?php echo $event['id'];?>">Book Now</a></button> -->
-    <a class="back-link" href="browse_events.php">← Back to Events</a>
+    <a class="back-link" href="events.php">← Back to Events</a>
 </div>
 
 </body>

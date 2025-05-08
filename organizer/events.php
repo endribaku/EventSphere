@@ -21,6 +21,7 @@
             <th> Event Date </th>
             <th> Location </th>
             <th> Category </th>
+            <th> Tickets Sold </th>
             <th> Status </th>
             <th> Actions </th>
         </tr>";
@@ -50,6 +51,14 @@
         $category = mysqli_fetch_assoc($categoryResult);
 
         echo "<td>".htmlspecialchars($category["name"])."</td>";
+        // tickets Sold
+        $ticketsQuery = "SELECT COALESCE(SUM(tickets), 0) AS tickets_sold FROM bookings WHERE event_id = ?";
+        $ticketStmt = mysqli_prepare($conn, $ticketsQuery);
+        mysqli_stmt_bind_param($ticketStmt, "i", $event['id']);
+        mysqli_stmt_execute($ticketStmt);
+        $ticketResult = mysqli_stmt_get_result($ticketStmt);
+        $ticket = mysqli_fetch_assoc($ticketResult);
+        echo "<td> ".htmlspecialchars($ticket["tickets_sold"]). " / ".$venue["capacity"]."</td>";
 
         // for status
         echo "<td>";
@@ -65,8 +74,10 @@
         echo "</td>";
         // for actions
         echo "<td>";
+        echo "<a href='event_details.php?id=" . $event['id'] . "'>Event Details</a> | ";
+        echo "<a href='view_bookings.php?id=" . $event['id'] . "'>View Bookings</a> | ";
         echo "<a href='update_event.php?id=" . $event['id'] . "'>Edit</a> | ";
-        echo "<a href='../events/delete.php?id=" . $event['id'] . "'>Delete</a>";
+        echo "<a href='../events/delete.php?id=" . $event['id'] . "'>Cancel</a>";
         echo "</div>";
         echo "</td>";
 
