@@ -26,8 +26,8 @@ while ($user = $users->fetch_assoc()) {
 
     // actions
     echo "<td>";
-    echo '<button> <a href="../userCrud/update.php?id='. $user["id"].' "> Update </button>';
-    echo '<button> <a href="../userCrud/delete.php?id='. $user["id"].' "> Delete </button>';
+    echo '<button> <a href="update_user.php?id='. $user["id"].' "> Update </button>';
+    echo '<button> <a href="../userCrud/delete.php?id='. $user["id"].' ">Delete</button>';
     echo "</tr>";
 }
 
