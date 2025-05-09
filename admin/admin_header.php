@@ -11,6 +11,7 @@
                 <ul class="nav_buttons">
                     <li class="nav_button"><a href="dashboard.php">Dashboard</a></li>
                     <li class="nav_button"><a href="users.php">Manage Users</a></li>
+                    <li class="nav_button"><a href="events.php">Manage Events</a></li>
                     <li class="nav_button"><a href="venues.php">Manage Venues</a></li>
                     <li class="nav_button"><a href="categories.php">Manage Categories</a></li>
                     <li class="nav_button"><a href="bookings.php">Manage Bookings</a></li>
