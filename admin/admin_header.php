@@ -1,0 +1,29 @@
+<body>
+    <div class="admin_header">
+        <div class="logo">
+            <div class="logo_text">Evently</div>
+        </div>
+    </div>
+
+
+        <div class="navigation_information">
+            <div class="nav_bar">
+                <ul class="nav_buttons">
+                    <li class="nav_button"><a href="dashboard.php">Dashboard</a></li>
+                    <li class="nav_button"><a href="users.php">Manage Users</a></li>
+                    <li class="nav_button"><a href="venues.php">Manage Venues</a></li>
+                    <li class="nav_button"><a href="categories.php">Manage Categories</a></li>
+                    <li class="nav_button"><a href="bookings.php">Manage Bookings</a></li>
+                </ul>
+            </div>
+
+            <div class="admin_info">
+                <?php
+                    session_start();
+                    echo "<p>".$_SESSION["user_name"]."</p>";
+                ?>
+                <a href="../php/logout.php">Logout</a>
+            </div>
+        </div>
+        
+    </div>

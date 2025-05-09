@@ -55,9 +55,11 @@
                             response = response.trim();  
                             if(response == "user") {
                                 window.location.href = "user/dashboard.php";
-                            } if(response == "organizer") {
+                            } else if(response == "organizer") {
                                 window.location.href = "organizer/dashboard.php";
-                            } 
+                            } else if(response == "admin") {
+                                window.location.href = "admin/dashboard.php";
+                            }
                             else {
                                 console.log(response);
                             }
