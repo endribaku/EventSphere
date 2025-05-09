@@ -26,12 +26,12 @@ require_once("../php/db.php");
 
 
 <form action="../userCrud/update.php" method="POST">
-    <div class="form-group">
+   
 
             <input type="hidden" name="id" value="<?php echo (int)$userAttributes['id']; ?>">
             <div class="form-group">
                 <label for="name">Update Name: </label>
-                <input type="text" name="name" value= "<?php echo htmlspecialchars($userAttributes['name']);?>" id="name" class="form-input">
+                <input type="text" name="name" value= "<?php echo htmlspecialchars($userAttributes['name']);?>" id="name" class="form-input" required>
             </div>
 
             <label for="email">Email (readonly):</label>
@@ -52,5 +52,5 @@ require_once("../php/db.php");
             </div>
         
             <input type="submit" value="Update User" class="btn btn-submit">
-    </div>
+    
 </form>

@@ -1,6 +1,6 @@
 <label for="country">Country</label><span style="color: red !important; display: inline; float: none;">*</span>      
         
-            <select id="country" name="country" class="form-control">
+            <select id="country" name="country" class="form-control" >
                 <option value="Afghanistan">Afghanistan</option>
                 <option value="Åland Islands">Åland Islands</option>
                 <option value="Albania">Albania</option>

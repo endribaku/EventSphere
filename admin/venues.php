@@ -26,6 +26,7 @@ echo "<table>
             <th> Location </th>
             <th> Country </th>
             <th> Capacity </th>
+            <th> Actions </th>
         </tr>";
 while($venueRow = $venue->fetch_assoc()) {
     echo "<tr>";
@@ -33,6 +34,13 @@ while($venueRow = $venue->fetch_assoc()) {
     echo "<td>".$venueRow['location']."</th>";
     echo "<td>".$venueRow['country']."</th>";
     echo "<td>".$venueRow['capacity']."</th>";
+
+    // actions
+    echo "<td>";
+    echo '<button> <a href="update_venue.php?id='.$venueRow['id'].'"> Update</button>';
+    echo '<button> <a href="../venues/delete.php?id='.$venueRow['id'].'"> Delete </button>';
+    echo "</td>";
+
     echo "</tr>";
 }
 
