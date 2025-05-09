@@ -37,6 +37,8 @@ require_once("../misc/countries.list.php");
 
 <div class="venue-update-form">
     <form action="../venues/update.php" method="POST">
+
+        <input type="hidden" name="id" value="<?php echo (int)$venueResult['id']; ?>">
         <div class="form-group">
             <label for="name">Name</label>
             <input type="text" name="name" value="<?php echo htmlspecialchars($venueResult["name"])?>" required>
@@ -63,5 +65,7 @@ require_once("../misc/countries.list.php");
             <label for="capacity">Capacity</label>
             <input type="number" name="capacity" min="1"  max="1000000" value="<?php echo (int) $venueResult["capacity"] ?>" required>
         </div>
+
+        <input type="submit" name="submit" value="Update Venue" class="btn btn-submit">
     </form>
 </div>
