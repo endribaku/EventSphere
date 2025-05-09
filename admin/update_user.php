@@ -34,6 +34,9 @@ require_once("../php/db.php");
                 <input type="text" name="name" value= "<?php echo htmlspecialchars($userAttributes['name']);?>" id="name" class="form-input">
             </div>
 
+            <label for="email">Email (readonly):</label>
+            <input type="email" name ="email" id="email" value="<?php echo htmlspecialchars($userAttributes['email']); ?>" readonly>
+
             <div class="form-group">
                 <label for="pwd">Update Password: Leave blank to keep current</label>
                 <input type="password" name="pwd" id="pwd" class="form-input">

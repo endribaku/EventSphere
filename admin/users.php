@@ -5,7 +5,7 @@ require_once("../php/db.php");
 ?>
 
 <?php 
-$userQuery = "SELECT * FROM users";
+$userQuery = "SELECT * FROM users WHERE role != 'admin'";
 $userStmt = $conn->prepare($userQuery);
 $userStmt->execute();
 $users = $userStmt->get_result();
