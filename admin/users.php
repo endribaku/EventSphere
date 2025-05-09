@@ -1,10 +1,19 @@
 <?php 
 require_once("admin_auth.php");
-require_once("admin_header.php");
+
 require_once("../php/db.php");
 ?>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users</title>
+</head>
+
 <?php 
+require_once("admin_header.php");
 $userQuery = "SELECT * FROM users WHERE role != 'admin'";
 $userStmt = $conn->prepare($userQuery);
 $userStmt->execute();
