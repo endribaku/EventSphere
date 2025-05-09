@@ -42,7 +42,7 @@
    $sort = isset($_GET["sort"]) ? $_GET["sort"] : "ascending";
    // filter sql logic
    $bookingsQuery = "SELECT e.title AS title, e.description, e.date AS event_date, v.location AS venue_location, v.name 
-   AS venue_name, b.booking_date, e.image, b.tickets, b.id AS booking_id, e.id AS event_id
+   AS venue_name, b.booking_date, e.price, e.image, b.tickets, b.id AS booking_id, e.id AS event_id
    FROM bookings b, events e, venues v WHERE b.event_id = e.id 
    AND e.venue_id = v.id AND user_id = ?";
 
@@ -94,6 +94,7 @@
                     <th> Venue </th>
                     <th> Location </th>
                     <th> Tickets </th>
+                    <th> Total Price </th>
                     <th> Date of Booking </th>
                     <th> Status </th>
                     <th> Actions </th>
@@ -110,6 +111,12 @@
             echo "<td>".$row["venue_name"]."</td>";
             echo "<td>".$row["venue_location"]."</td>";
             echo "<td>".$row["tickets"]."</td>";
+
+            // sum of tickets logic
+            $sumOfTickets = $row["price"] * $row["tickets"];
+            echo "<td> $" . number_format($sumOfTickets, 2). "</td>";
+
+
             echo "<td>".$row["booking_date"]."</td>";
             echo "<td>";
             if($row["event_date"] < $currentDate) {

@@ -20,8 +20,8 @@
     }
 
     $event_id = $_GET["id"];
-    $bookingsQuery = "SELECT u.name, u.email, b.tickets, b.booking_date FROM users u, bookings b 
-                    WHERE u.id = b.user_id AND event_id = ?";
+    $bookingsQuery = "SELECT u.name, u.email, b.tickets, b.booking_date, e.price FROM users u, bookings b, events e 
+                    WHERE u.id = b.user_id AND b.event_id = e.id AND event_id = ?";
     $bookings = $conn->prepare($bookingsQuery);
     $bookings->bind_param("i", $event_id);
     $bookings->execute();
@@ -36,6 +36,7 @@
             <th> Name </th>
             <th> Email </th>
             <th> Tickets </th>
+            <th> Total Price </th>
             <th> Booking Date </th>
             </tr>";
 
@@ -44,6 +45,8 @@
         echo "<td>".htmlspecialchars( $booking["name"] )."</td>";
         echo "<td>".htmlspecialchars( $booking["email"] )."</td>";
         echo "<td>".htmlspecialchars( $booking["tickets"] )."</td>";
+        $sumOfTickets = $booking["tickets"] * $booking["price"];
+        echo "<td> $" . number_format($sumOfTickets, 2)."</td>";
         echo "<td>".htmlspecialchars( $booking["booking_date"] )."</td>";
         echo "</tr>";
     }

@@ -10,6 +10,7 @@
         $venue_id = $_POST['venue_id'];
         $organizer_id = $_SESSION['user_id']; 
         $category_id = $_POST['category_id'];
+        $price = $_POST['price'];
     
         
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
@@ -34,10 +35,10 @@
             $imagePath = null; 
         }
 
-        $insertQuery = "INSERT INTO events (organizer_id, title, description, date, venue_id, image, category_id)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $insertQuery = "INSERT INTO events (organizer_id, title, description, date, venue_id, image, category_id, price)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($conn, $insertQuery);
-        mysqli_stmt_bind_param($stmt, "isssdsi", $organizer_id, $title, $description, $date, $venue_id, $imagePath, $category_id);
+        mysqli_stmt_bind_param($stmt, "isssdsid", $organizer_id, $title, $description, $date, $venue_id, $imagePath, $category_id, $price);
         $result = mysqli_stmt_execute($stmt);
 
         if($result) {
@@ -103,6 +104,9 @@
             }
             ?>
         </select>
+
+        <label for="price">Ticket Price ($):</label>
+        <input type="number" name="price" step="0.01" min="0" required> 
 
         <button type="submit" name="submit">Create Event</button>
     </form>

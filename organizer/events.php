@@ -22,6 +22,7 @@
             <th> Location </th>
             <th> Category </th>
             <th> Tickets Sold </th>
+            <th> Price </th>
             <th> Status </th>
             <th> Actions </th>
         </tr>";
@@ -39,7 +40,7 @@
         $venueResult = mysqli_stmt_get_result($venueStmt);
         $venue = mysqli_fetch_assoc($venueResult);
 
-        echo "<td><strong>Venue:</strong> " . htmlspecialchars($venue['name']) . "</td>";
+        echo "<td>" . htmlspecialchars($venue['name']) . "</td>";
         
         // category add
         $categoryQuery = "SELECT * from event_categories WHERE id = ?";
@@ -59,7 +60,10 @@
         $ticketResult = mysqli_stmt_get_result($ticketStmt);
         $ticket = mysqli_fetch_assoc($ticketResult);
         echo "<td> ".htmlspecialchars($ticket["tickets_sold"]). " / ".$venue["capacity"]."</td>";
-
+        // ticket price
+        
+        echo "<td> $" . number_format($event['price'], 2)."</td>";
+        
         // for status
         echo "<td>";
         $today = date("Y-m-d");

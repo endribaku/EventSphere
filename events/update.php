@@ -19,6 +19,7 @@ if(isset($_POST["submit"])) {
     $date = $_POST["date"];
     $venueid = $_POST["venue"];
     $categoryid = $_POST["category"];
+    $price = $_POST["price"];
     
     //this check shouldnt be, i need to add validation on update_event for this 
     if(empty($title) || empty($description) || empty($date) || empty($venueid)) {
@@ -56,13 +57,13 @@ if(isset($_POST["submit"])) {
         $imageUpdateClause = ", image = ?";
     }
     
-    $query = "UPDATE events SET title = ?, description = ?, date = ?, venue_id = ?, category_id = ? $imageUpdateClause WHERE id = ? AND organizer_id = ?";
+    $query = "UPDATE events SET title = ?, description = ?, price = ?, date = ?, venue_id = ?, category_id = ? $imageUpdateClause WHERE id = ? AND organizer_id = ?";
     $stmt = mysqli_prepare($conn, $query); 
 
     if ($imagePath) {
-        mysqli_stmt_bind_param($stmt, "sssissii", $title, $description, $date, $venueid, $categoryid, $imagePath, $event_id, $organizer_id);
+        mysqli_stmt_bind_param($stmt, "ssdsiisii", $title, $description, $price ,$date, $venueid, $categoryid, $imagePath, $event_id, $organizer_id);
     } else {
-        mysqli_stmt_bind_param($stmt, "sssiiii", $title, $description, $date, $venueid, $categoryid, $event_id, $organizer_id);
+        mysqli_stmt_bind_param($stmt, "ssdsiiii", $title, $description, $price, $date, $venueid, $categoryid, $event_id, $organizer_id);
     }
 
     $result = mysqli_stmt_execute($stmt);

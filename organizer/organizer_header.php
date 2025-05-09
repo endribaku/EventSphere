@@ -13,7 +13,7 @@
                     <li class="nav_button"><a href="dashboard.php">Dashboard</a></li>
                     <li class="nav_button"><a href="events.php">My Events</a></li>
                     <li class="nav_button"><a href="create_event.php">Create Event</a></li>
-                    <li class="nav_button"><a href="bookings.php">Bookings</a></li>
+                   
                 </ul>
             </div>
 

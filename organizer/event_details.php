@@ -45,6 +45,7 @@
     <p><strong>Location:</strong> <?php echo htmlspecialchars($event['venue_location']); ?></p>
     <p><strong>Description:</strong></p>
     <p><?php echo nl2br(htmlspecialchars($event['description'])); ?></p>
+    <p><strong>Price:</strong><?php echo " $" . number_format($event['price'], 2);?></p>
     
     <?php
         $currentDate = date('Y-m-d');

@@ -77,5 +77,7 @@ $eventTime = $event["date"];
         ?>
     </select>
 
+    <input type="number" name="price" step="0.01" value="<?php echo htmlspecialchars($event['price']); ?>" required>
+
     <button type="submit" name="submit">Update Event</button>
 </form>

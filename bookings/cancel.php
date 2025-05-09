@@ -7,6 +7,7 @@
         header("Location: ../user/browse_events.php");
         exit();
     }
+    
 
     $bookingId = $_GET["id"];
     $userId = $_SESSION["user_id"];
