@@ -133,7 +133,7 @@
             echo '<p>Category: ' . htmlspecialchars($event['category_name']) . '</p>';
             echo '<p>Date: ' . htmlspecialchars($event['date']) . '</p>';
             echo '<p>' . htmlspecialchars($event['description']) . '</p>';
-            echo '<p>' . htmlspecialchars($event['price']) . '</p>';
+            echo '<p> $ ' . htmlspecialchars($event['price']) . '</p>';
             echo '</div>';
         }
         echo '</div>';
