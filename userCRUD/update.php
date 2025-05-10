@@ -10,8 +10,8 @@
         exit();
     }
     
-
-    $user_id = $_POST["id"];
+    if(isset($_POST["submit"])) {
+        $user_id = $_POST["id"];
     $user_name = $_POST["name"];
     $user_email = $_POST["email"];
     $user_password = $_POST["pwd"];
@@ -35,5 +35,7 @@
     } else {
         die("Failed to update user.");
     }
+    }
+    
 
 ?>

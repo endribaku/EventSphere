@@ -49,6 +49,9 @@
             <option value="date_desc" <?php if(isset($_GET['sort']) && $_GET['sort'] == 'date_desc') echo 'selected'; ?>> Descending</option>
         </select>
 
+        <input type="number" step="0.01" name="min_price" placeholder="Min Price" value="<?php echo isset($_GET['min_price']) ? htmlspecialchars($_GET['min_price']) : ''; ?>">
+        <input type="number" step="0.01" name="max_price" placeholder="Max Price" value="<?php echo isset($_GET['max_price']) ? htmlspecialchars($_GET['max_price']) : ''; ?>">
+
         <button type="submit">Filter</button>
     </form>
 </div>
@@ -58,6 +61,8 @@
    $category = isset($_GET["category"]) ? $_GET["category"] : "";
    $date_filter = isset($_GET["date_filter"]) ? $_GET["date_filter"] : "";
    $sort = isset($_GET["sort"]) ? $_GET["sort"] : "";
+   $min_price = isset($_GET["min_price"]) && is_numeric($_GET["min_price"]) ? floatval($_GET["min_price"]) : null;
+   $max_price = isset($_GET["max_price"]) && is_numeric($_GET["max_price"]) ? floatval($_GET["max_price"]) : null;
 
    // filter sql query logic
    $filterQuery = "SELECT e.*, c.name AS category_name FROM events e, event_categories c WHERE 1=1 AND e.category_id = c.id";
@@ -102,6 +107,17 @@
                 break;
             }
    }
+   if (!empty($min_price)) {
+    $filterQuery .= " AND e.price >= ?";
+    $parameters[] = $min_price;
+    $types .= 'd';
+}
+
+    if (!empty($max_price)) {
+        $filterQuery .= " AND e.price <= ?";
+        $parameters[] = $max_price;
+        $types .= 'd';
+    }
 
    switch ($sort) {
     case 'date_asc':
@@ -115,6 +131,8 @@
         $filterQuery .= " ORDER BY e.date ASC";
         break;
     }
+
+    
 
     $stmt = $conn->prepare($filterQuery);
     if(!empty($parameters)) {

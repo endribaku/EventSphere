@@ -18,14 +18,14 @@ if(isset($_POST["submit"])) {
     $updateVenueStmt = $conn->prepare($updateVenueQuery);
     $updateVenueStmt->bind_param("sssii", $venue_name, $venue_location, $venue_country, $venue_capacity, $venue_id);
     
-    if( $updateVenueStmt->execute() ) {
+    if($updateVenueStmt->execute() ) {
         header("Location: ../admin/venues.php");
         exit();
     } else {
         die("Update couldn't be made");
     }
-
-
+} else {
+    die("Submit hasn't been made yet");
 }
 
 

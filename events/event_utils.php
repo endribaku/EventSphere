@@ -1,4 +1,4 @@
-// event_utils.php
+
 <?php
 function deleteEventById($conn, $event_id) {
     $getEventQuery = "SELECT * FROM events WHERE id = ?";
@@ -25,4 +25,15 @@ function deleteEventById($conn, $event_id) {
     return mysqli_stmt_execute($stmt);
 }
 
-?>
+
+
+function getEventById($conn, $event_id) {
+    $getEventQuery = "SELECT * FROM events WHERE id = ?";
+    $stmt = mysqli_prepare($conn, $getEventQuery);
+    mysqli_stmt_bind_param($stmt, "i", $event_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    return $result;
+
+}

@@ -51,6 +51,6 @@ require_once("../php/db.php");
                 </select>
             </div>
         
-            <input type="submit" value="Update User" class="btn btn-submit">
+            <input type="submit" name="submit" value="Update User" class="btn btn-submit">
     
 </form>

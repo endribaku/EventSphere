@@ -39,6 +39,12 @@ $eventTime = $event["date"];
 ?>
 
 <form action="../events/update.php?id=<?php echo $event['id']; ?>" method="POST" enctype="multipart/form-data">
+    <?php if (!empty($event['image'])): ?>
+        <div class="form-group">
+            <label>Current Image:</label><br>
+            <img src="<?php echo htmlspecialchars($event['image']); ?>" alt="Event Image" style="max-height: 100px;">
+        </div>
+    <?php endif; ?>
     <label for="title">Event Title</label>
     <input type="text" name="title" value="<?php echo htmlspecialchars($event['title']); ?>" required><br>
 
