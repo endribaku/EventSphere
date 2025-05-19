@@ -73,6 +73,65 @@ $sort = (isset($_GET["sort"])) ? $_GET["sort"] : "ascending";
 $start_date = (isset($_GET["start_date"])) ? $_GET["start_date"] :"";
 $end_date = (isset($_GET["end_date"])) ? $_GET["end_date"] :"";
 
+$per_page = 5;
+$page = isset($_GET["page"]) && is_numeric($_GET["page"]) ? (int) $_GET["page"] : 1;
+$offset = ($page - 1) * $per_page;
+
+//paginated logic
+$countQuery = "SELECT COUNT(*) AS total FROM bookings b
+JOIN events e ON b.event_id = e.id
+JOIN venues v ON e.venue_id = v.id
+JOIN users u ON b.user_id = u.id WHERE 1=1";
+$countParams = [];
+$countTypes = "";
+
+if(!empty($user)) {
+    $countQuery .= " AND u.name LIKE ?";
+    $countParams[] = "%$user%";
+    $countTypes .= "s";
+}
+
+if(!empty($event)) {
+    $countQuery .= " AND e.title LIKE ?";
+    $countParams[] = "%$event%";
+    $countTypes .= "s";
+}
+
+if(!empty($status)) {
+    $currentDate = date("Y-m-d");
+    if($status == "upcoming") {
+        $countQuery .= " AND e.date >= ?";
+        $countParams[] = $currentDate;
+        $countTypes .= "s";
+    } else if($status == "past") {
+        $countQuery .= " AND e.date < ?";
+        $countParams[] = $currentDate;
+        $countTypes .= "s";
+    }
+}
+
+if (!empty($start_date)) {
+    $countQuery .= " AND b.booking_date >= ?";
+    $countParams[] = $start_date . " 00:00:00";
+    $countTypes .= "s";
+}
+
+if (!empty($end_date)) {
+    $countQuery .= " AND b.booking_date <= ?";
+    $countParams[] = $end_date . " 23:59:59";
+    $countTypes .= "s";
+}
+
+$countStmt = $conn->prepare($countQuery);
+if (!empty($countParams)) {
+    $countStmt->bind_param($countTypes, ...$countParams);
+}
+$countStmt->execute();
+$total_results = $countStmt->get_result()->fetch_assoc()["total"];
+$countStmt->close();
+$total_pages = ceil($total_results / $per_page);
+
+
 //filter sql logic
 $bookingsQuery = "SELECT u.name, e.title AS title, e.description, e.date AS event_date, v.location AS venue_location, v.name 
    AS venue_name, b.booking_date, e.price, e.image, b.tickets, b.id AS booking_id, e.id AS event_id
@@ -127,6 +186,10 @@ if ($sort == "ascending") {
     $bookingsQuery .= " ORDER BY b.booking_date DESC";
 }
 
+$bookingsQuery .= " LIMIT ? OFFSET ?";
+$parameters[] = $per_page;
+$parameters[] = $offset;
+$types .= "ii";
 
 
 $bookingResult = $conn->prepare($bookingsQuery);
@@ -193,7 +256,19 @@ if($bookingResult->num_rows > 0) {
 
         echo "</table>";
 
-    }
+    
+
+
+        echo "<div style='margin-top:20px;'>Pages: ";
+        for ($i = 1; $i <= $total_pages; $i++) {
+            $query = $_GET;
+            $query["page"] = $i;
+            $url = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
+            $isCurrent = ($i == $page) ? "style='font-weight:bold;'" : "";
+            echo "<a href='$url' $isCurrent>$i</a> ";
+        }
+        echo "</div>";
+}
 else {
     echo "<h2> No Bookings Found </h2>";
 }
