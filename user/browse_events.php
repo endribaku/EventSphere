@@ -57,6 +57,10 @@
 </div>
 
 <?php
+    $per_page = 4;
+    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+    $offset = ($page - 1) * $per_page;
+
    $searchBar = isset($_GET["search"]) ? $_GET["search"] : "";
    $category = isset($_GET["category"]) ? $_GET["category"] : "";
    $date_filter = isset($_GET["date_filter"]) ? $_GET["date_filter"] : "";
@@ -68,6 +72,8 @@
    $filterQuery = "SELECT e.*, c.name AS category_name FROM events e, event_categories c WHERE 1=1 AND e.category_id = c.id";
    $parameters = [];
    $types = '';
+
+    
 
    if(!empty($searchBar)) {
     $filterQuery .= " AND (e.title LIKE ? OR e.description LIKE ?) ";  
@@ -132,6 +138,24 @@
         break;
     }
 
+    $countQuery = "SELECT COUNT(*) AS total FROM (" . $filterQuery . ") AS temp";
+    $countParams = $parameters;
+    $countTypes = $types;
+
+    $filterQuery .= " LIMIT ? OFFSET ?";
+    $types .= "ii";
+    $parameters[] = $per_page;
+    $parameters[] = $offset;
+
+    $countStmt = $conn->prepare($countQuery);
+    if (!empty($countParams)) {
+        $countStmt->bind_param($countTypes, ...$countParams);
+    }
+    $countStmt->execute();
+    $total_results = $countStmt->get_result()->fetch_assoc()["total"];
+    $countStmt->close();
+    $total_pages = ceil($total_results / $per_page);
+
     
 
     $stmt = $conn->prepare($filterQuery);
@@ -157,9 +181,23 @@
         echo '</div>';
         echo '</body>';
         echo '</html>';
+
+        if (true) {
+            echo "<div style='margin-top:20px;'>Pages: ";
+            for ($i = 1; $i <= $total_pages; $i++) {
+                $query = $_GET;
+                $query["page"] = $i;
+                $url = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
+                $isCurrent = $i == $page ? "style='font-weight:bold;'" : "";
+                echo "<a href='$url' $isCurrent>$i</a> ";
+            }
+            echo "</div>";
+        }
     } else {
         echo '<p>No events found matching your criteria.</p>';
     }
+
+    
 ?>
 
 
