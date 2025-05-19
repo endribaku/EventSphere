@@ -28,9 +28,41 @@ require_once("admin_header.php");
 $nameFilter = isset($_GET['name']) ? $_GET['name'] : '';
 $emailFilter = isset($_GET['email']) ? $_GET['email'] : '';
 
+$per_page = 3;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $per_page;
+
+//total pages count
+$countQuery = "SELECT COUNT(*) AS total FROM users";
+$countParams = [];
+$countTypes = "";
+
+if (!empty($nameFilter)) {
+    $countQuery .= " AND name LIKE ?";
+    $countParams[] = "%$nameFilter%";
+    $countTypes .= "s";
+}
+if (!empty($emailFilter)) {
+    $countQuery .= " AND email LIKE ?";
+    $countParams[] = "%$emailFilter%";
+    $countTypes .= "s";
+}
+
+$countStmt = $conn->prepare($countQuery);
+if (!empty($countParams)) {
+    $countStmt->bind_param($countTypes, ...$countParams);
+}
+$countStmt->execute();
+$total_users = $countStmt->get_result()->fetch_assoc()['total'];
+$countStmt->close();
+
+$total_pages = ceil($total_users / $per_page);
+
+
 $userQuery = "SELECT * FROM users WHERE 1=1";
 $params = [];
 $types = "";
+
 
 if (!empty($nameFilter)) {
     $userQuery .= " AND name LIKE ?";
@@ -42,6 +74,13 @@ if (!empty($emailFilter)) {
     $params[] = "%$emailFilter%";
     $types .= "s";
 }
+
+
+$userQuery .= " LIMIT ? OFFSET ?";
+$params[] = $per_page;
+$params[] = $offset;
+$types .= "ii";
+
 
 $userStmt = $conn->prepare($userQuery);
 if (!empty($params)) {
@@ -74,6 +113,17 @@ while ($user = $users->fetch_assoc()) {
 }
 
 echo "</table>";
+echo "<div style='margin-top: 20px;'>Pages: ";
+        for ($i = 1; $i <= $total_pages; $i++) {
+            $query = $_GET;
+            $query['page'] = $i;
+            $url = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
+            $bold = $i == $page ? "style='font-weight:bold;'" : "";
+            echo "<a href='$url' $bold>$i</a> ";
+        }
+        echo "</div>";
+
+
 echo "</body>";
 echo "</html>";
 
