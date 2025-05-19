@@ -14,10 +14,160 @@ require_once("../php/db.php");
 
 <?php 
 require_once("admin_header.php");
-$eventQuery = "SELECT * FROM events";
-$eventStmt = $conn->prepare($eventQuery);
-$eventStmt->execute();
-$events = $eventStmt->get_result();
+?>
+
+<div class="search-form">
+    <form action="events.php" method="GET">
+        <input type="text" name="search" placeholder="Search by title or keyword"
+            value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+
+        <select name="category">
+            <option value="">All Categories</option>
+            <?php
+               $categories = mysqli_query($conn, "SELECT id, name FROM event_categories");
+               while ($category = mysqli_fetch_assoc($categories)) {
+                    $selected = (isset($_GET["category"]) && $_GET["category"] == $category["id"]) ? "selected": "";
+                    echo "<option value='{$category['id']}' $selected> {$category['name']}</option>";
+               }
+            ?>
+        </select>
+
+        <select name="date_filter">
+            <option value="">Any Date</option>
+            <option value="today" <?php if(isset($_GET['date_filter']) && $_GET['date_filter'] == "today") echo 'selected'; ?>>Today</option>
+            <option value="upcoming" <?php if(isset($_GET['date_filter']) && $_GET['date_filter'] == "upcoming") echo 'selected'; ?>>Upcoming</option>
+            <option value="this_month" <?php if(isset($_GET['date_filter']) && $_GET['date_filter'] == 'this_month') echo 'selected'; ?>>This Month</option>
+        </select>
+
+        <select name="sort">
+            <option value="">Sort By</option>
+            <option value="date_asc" <?php if(isset($_GET['sort']) && $_GET['sort'] == 'date_asc') echo 'selected'; ?>> Ascending</option>
+            <option value="date_desc" <?php if(isset($_GET['sort']) && $_GET['sort'] == 'date_desc') echo 'selected'; ?>> Descending</option>
+        </select>
+
+        <input type="number" step="0.01" name="min_tickets" placeholder="Min Tickets Sold" value="<?php echo isset($_GET['min_tickets']) ? htmlspecialchars($_GET['min_tickets']) : ''; ?>">
+        <input type="number" step="0.01" name="max_tickets" placeholder="Max Tickets Sold" value="<?php echo isset($_GET['max_tickets']) ? htmlspecialchars($_GET['max_tickets']) : ''; ?>">
+
+        <input type="number" step="0.01" name="min_price" placeholder="Min Price" value="<?php echo isset($_GET['min_price']) ? htmlspecialchars($_GET['min_price']) : ''; ?>">
+        <input type="number" step="0.01" name="max_price" placeholder="Max Price" value="<?php echo isset($_GET['max_price']) ? htmlspecialchars($_GET['max_price']) : ''; ?>">
+
+        <button type="submit">Filter</button>
+    </form>
+</div>
+
+<?php
+$searchBar = isset($_GET["search"]) ? $_GET["search"] : "";
+$category = isset($_GET["category"]) ? $_GET["category"] : "";
+$date_filter = isset($_GET["date_filter"]) ? $_GET["date_filter"] : "";
+$sort = isset($_GET["sort"]) ? $_GET["sort"] : "";
+$min_tickets = isset($_GET["min_tickets"]) && is_numeric($_GET["min_tickets"]) ? floatval($_GET["min_tickets"]) : null;
+$max_tickets = isset($_GET["max_tickets"]) && is_numeric($_GET["max_tickets"]) ? floatval($_GET["max_tickets"]) : null;
+$min_price = isset($_GET["min_price"]) && is_numeric($_GET["min_price"]) ? floatval($_GET["min_price"]) : null;
+$max_price = isset($_GET["max_price"]) && is_numeric($_GET["max_price"]) ? floatval($_GET["max_price"]) : null;
+
+
+
+$filterQuery = "SELECT * from events WHERE 1=1";
+$parameters = [];
+$types = '';
+
+
+if(!empty($searchBar)) {
+    $filterQuery .= " AND (title LIKE ?) ";  
+    $searchTerm = "%$searchBar%";
+    $parameters[] = $searchTerm;
+    $types .= "s";
+}
+
+if(!empty($category)) {
+    $filterQuery .= " AND category_id = ?";
+    $parameters[] = $category;
+    $types .= "i";
+   }
+   $currentDate = date('Y-m-d');
+   if(!empty($date_filter)) {
+        switch($date_filter) {
+            case "today":
+                $filterQuery .= " AND date = ?";
+                $parameters[] = $currentDate;
+                $types .= 's';
+                break;
+            case "upcoming":
+                $filterQuery .= " AND date >= ?";
+                $parameters[] = $currentDate;
+                $types .= 's';
+                break;
+            
+            case 'this_month':
+                $firstDayOfMonth = date('Y-m-01');
+                $lastDayOfMonth = date('Y-m-t');
+                $filterQuery .= " AND date BETWEEN ? AND ?";
+                $parameters[] = $firstDayOfMonth;
+                $parameters[] = $lastDayOfMonth;
+                $types .= "ss";
+                break;
+            }
+   }
+
+if(!is_null($min_tickets) || !is_null($max_tickets)) {
+    $filterQuery .= " AND id IN (
+    SELECT event_id FROM bookings GROUP BY event_id HAVING ";
+
+        if (!is_null($min_tickets)) {
+            $filterQuery .= " SUM(tickets) >= ? ";
+            $parameters[] = $min_tickets;
+            $types .= 'i';
+        }
+
+        if (!is_null($max_tickets)) {
+            if (!is_null($min_tickets)) {
+                $filterQuery .= " AND ";
+            }
+            $filterQuery .= " SUM(tickets) <= ? ";
+            $parameters[] = $max_tickets;
+            $types .= 'i';
+        }
+    
+        $filterQuery .= ")";
+}
+
+
+
+if (!empty($min_price)) {
+    $filterQuery .= " AND price >= ?";
+    $parameters[] = $min_price;
+    $types .= 'd';
+}
+
+if (!empty($max_price)) {
+        $filterQuery .= " AND price <= ?";
+        $parameters[] = $max_price;
+        $types .= 'd';
+}
+
+switch ($sort) {
+    case 'date_asc':
+        $filterQuery .= " ORDER BY date ASC";
+        break;
+    case 'date_desc':
+        $filterQuery .= " ORDER BY date DESC";
+        break;
+    default:
+        // Default sorting (you can change this)
+        $filterQuery .= " ORDER BY date ASC";
+        break;
+    }
+
+
+$stmt = mysqli_prepare($conn, $filterQuery);
+if(!empty($parameters)) {
+    mysqli_stmt_bind_param($stmt,$types, ...$parameters);
+}
+mysqli_stmt_execute($stmt);
+$events = mysqli_stmt_get_result($stmt);
+
+if($events->num_rows > 0) {
+
 
 echo "<table>
         <tr>
@@ -91,3 +241,5 @@ while( $event = $events->fetch_assoc() ) {
 
         echo "</tr>";
 }
+} else echo "No events found";
+

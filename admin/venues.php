@@ -12,6 +12,27 @@ require_once("admin_auth.php");
 
 <?php 
 require_once("admin_header.php");
+?>
+
+<div class="venue-filter-form">
+    <form method="GET" action="venues.php">
+        <input type="text" name="name" placeholder="Search by name" value="<?= isset($_GET['name']) ? htmlspecialchars($_GET['name']) : '' ?>">
+        <input type="text" name="location" placeholder="Search by location" value="<?= isset($_GET['location']) ? htmlspecialchars($_GET['location']) : '' ?>">
+        <input type="text" name="country" placeholder="Search by country" value="<?= isset($_GET['country']) ? htmlspecialchars($_GET['country']) : '' ?>">
+        <input type="number" name="min_capacity" placeholder="Min capacity" value="<?= isset($_GET['min_capacity']) ? htmlspecialchars($_GET['min_capacity']) : '' ?>">
+        <input type="number" name="max_capacity" placeholder="Max capacity" value="<?= isset($_GET['max_capacity']) ? htmlspecialchars($_GET['max_capacity']) : '' ?>">
+
+        <select name="sort">
+            <option value="">Sort By</option>
+            <option value="name_asc" <?= (isset($_GET['sort']) && $_GET['sort'] === 'name_asc') ? 'selected' : '' ?>>Name A–Z</option>
+            <option value="capacity_desc" <?= (isset($_GET['sort']) && $_GET['sort'] === 'capacity_desc') ? 'selected' : '' ?>>Capacity High–Low</option>
+        </select>
+
+        <button type="submit">Filter</button>
+    </form>
+</div>
+
+<?php
 require_once("../php/db.php");
 
 $venueQuery = "SELECT * from venues";

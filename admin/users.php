@@ -12,10 +12,41 @@ require_once("../php/db.php");
     <title>Users</title>
 </head>
 
+
+
 <?php 
 require_once("admin_header.php");
+?>
+
+<form method="GET" style="margin: 20px 0;">
+    <input type="text" name="name" placeholder="Search by name" value="<?= htmlspecialchars($nameFilter) ?>">
+    <input type="text" name="email" placeholder="Search by email" value="<?= htmlspecialchars($emailFilter) ?>">
+    <button type="submit">Filter</button>
+</form>
+<?php
+
+$nameFilter = isset($_GET['name']) ? $_GET['name'] : '';
+$emailFilter = isset($_GET['email']) ? $_GET['email'] : '';
+
 $userQuery = "SELECT * FROM users WHERE role != 'admin'";
+$params = [];
+$types = "";
+
+if (!empty($nameFilter)) {
+    $userQuery .= " AND name LIKE ?";
+    $params[] = "%$nameFilter%";
+    $types .= "s";
+}
+if (!empty($emailFilter)) {
+    $userQuery .= " AND email LIKE ?";
+    $params[] = "%$emailFilter%";
+    $types .= "s";
+}
+
 $userStmt = $conn->prepare($userQuery);
+if (!empty($params)) {
+    $userStmt->bind_param($types, ...$params);
+}
 $userStmt->execute();
 $users = $userStmt->get_result();
 
