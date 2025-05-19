@@ -35,10 +35,62 @@ require_once("admin_header.php");
 <?php
 require_once("../php/db.php");
 
-$venueQuery = "SELECT * from venues";
-$venueResult =  $conn->prepare($venueQuery);
-$venueResult->execute();
-$venue = $venueResult->get_result();
+$venueQuery = "SELECT * FROM venues WHERE 1=1";
+$parameters = [];
+$types = '';
+
+// Filters
+if (!empty($_GET['name'])) {
+    $venueQuery .= " AND name LIKE ?";
+    $parameters[] = '%' . $_GET['name'] . '%';
+    $types .= 's';
+}
+
+if (!empty($_GET['location'])) {
+    $venueQuery .= " AND location LIKE ?";
+    $parameters[] = '%' . $_GET['location'] . '%';
+    $types .= 's';
+}
+
+if (!empty($_GET['country'])) {
+    $venueQuery .= " AND country LIKE ?";
+    $parameters[] = '%' . $_GET['country'] . '%';
+    $types .= 's';
+}
+
+if (!empty($_GET['min_capacity']) && is_numeric($_GET['min_capacity'])) {
+    $venueQuery .= " AND capacity >= ?";
+    $parameters[] = intval($_GET['min_capacity']);
+    $types .= 'i';
+}
+
+if (!empty($_GET['max_capacity']) && is_numeric($_GET['max_capacity'])) {
+    $venueQuery .= " AND capacity <= ?";
+    $parameters[] = intval($_GET['max_capacity']);
+    $types .= 'i';
+}
+
+// Sorting
+if (!empty($_GET['sort'])) {
+    switch ($_GET['sort']) {
+        case 'name_asc':
+            $venueQuery .= " ORDER BY name ASC";
+            break;
+        case 'capacity_desc':
+            $venueQuery .= " ORDER BY capacity DESC";
+            break;
+    }
+} else {
+    $venueQuery .= " ORDER BY name ASC"; // Default sort
+}
+
+// Prepare and bind
+$venueStmt = $conn->prepare($venueQuery);
+if (!empty($parameters)) {
+    $venueStmt->bind_param($types, ...$parameters);
+}
+$venueStmt->execute();
+$venue = $venueStmt->get_result();
 
 echo '<div class="venue-table">';
 echo "<table>
@@ -51,10 +103,10 @@ echo "<table>
         </tr>";
 while($venueRow = $venue->fetch_assoc()) {
     echo "<tr>";
-    echo "<td>".$venueRow['name']."</th>";
-    echo "<td>".$venueRow['location']."</th>";
-    echo "<td>".$venueRow['country']."</th>";
-    echo "<td>".$venueRow['capacity']."</th>";
+    echo "<td>".$venueRow['name']."</td>";
+    echo "<td>".$venueRow['location']."</td>";
+    echo "<td>".$venueRow['country']."</td>";
+    echo "<td>".$venueRow['capacity']."</dh>";
 
     // actions
     echo "<td>";
