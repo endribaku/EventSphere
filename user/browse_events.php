@@ -192,6 +192,8 @@
                 echo "<a href='$url' $isCurrent>$i</a> ";
             }
             echo "</div>";
+
+            
         }
     } else {
         echo '<p>No events found matching your criteria.</p>';

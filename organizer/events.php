@@ -63,7 +63,7 @@
     $min_price = isset($_GET["min_price"]) && is_numeric($_GET["min_price"]) ? floatval($_GET["min_price"]) : null;
     $max_price = isset($_GET["max_price"]) && is_numeric($_GET["max_price"]) ? floatval($_GET["max_price"]) : null;
 
-    $per_page = 5;
+    $per_page = 3;
     $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
     $offset = ($page - 1) * $per_page;
 
@@ -260,29 +260,20 @@
     }
     echo "</table>";
 
-   
+    
+    if ($total_pages > 1) {
         echo "<div style='margin-top:20px;'>Pages: ";
-    
-        if ($page > 1) {
-            $query['page'] = $page - 1;
-            $prevUrl = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
-            echo "<a href='$prevUrl'>« Prev</a> ";
-        }
-    
         for ($i = 1; $i <= $total_pages; $i++) {
-            $query['page'] = $i;
-            $url = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
-            $isCurrent = $i == $page ? "style='font-weight:bold;'" : "";
-            echo "<a href='$url' $isCurrent>$i</a> ";
+                $query = $_GET;
+                $query['page'] = $i;
+                $url = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
+                $isCurrent = $i == $page ? "style='font-weight:bold;'" : "";
+                echo "<a href='$url' $isCurrent>$i</a> ";
         }
-    
-        if ($page < $total_pages) {
-            $query['page'] = $page + 1;
-            $nextUrl = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
-            echo "<a href='$nextUrl'>Next »</a>";
-        }
-    
         echo "</div>";
+    }
+    
+    echo "</div>";
     
 
     }
