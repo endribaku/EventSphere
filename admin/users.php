@@ -28,7 +28,7 @@ require_once("admin_header.php");
 $nameFilter = isset($_GET['name']) ? $_GET['name'] : '';
 $emailFilter = isset($_GET['email']) ? $_GET['email'] : '';
 
-$userQuery = "SELECT * FROM users WHERE role != 'admin'";
+$userQuery = "SELECT * FROM users WHERE 1=1";
 $params = [];
 $types = "";
 
@@ -55,6 +55,7 @@ echo "<table>
             <th> Id </th>
             <th> Name </th>
             <th> Email </th>
+            <th> Role </th>
             <th> Actions </th>
            
         </tr>";
@@ -63,6 +64,7 @@ while ($user = $users->fetch_assoc()) {
     echo "<td>". $user["id"] ."</td>";
     echo "<td>". $user["name"] ."</td>";
     echo "<td>". $user["email"] ."</td>";
+    echo "<td>". strtoupper($user["role"]) . "</td>";
 
     // actions
     echo "<td>";
@@ -75,4 +77,24 @@ echo "</table>";
 echo "</body>";
 echo "</html>";
 
+// Optional: show feedback
+if (isset($_GET['success'])) echo "<p style='color: green;'>✅ User created successfully.</p>";
+if (isset($_GET['error'])) echo "<p style='color: red;'>❌ Failed to create user. Please check inputs.</p>";
+
 ?>
+
+<h3>Create New User</h3>
+<form method="POST" action="../userCrud/create.php" style="margin: 20px 0; display: flex; flex-direction: column; gap: 10px; max-width: 400px;">
+    <input type="text" name="name" placeholder="Full Name" required>
+    <input type="email" name="email" placeholder="Email Address" required>
+    <input type="password" name="password" placeholder="Password" required>
+    
+    <select name="role" required>
+        <option value="">Select Role</option>
+        <option value="user">User</option>
+        <option value="organizer">Organizer</option>
+        <option value="admin">Admin</option>
+    </select>
+    
+    <button type="submit">Create User</button>
+</form>

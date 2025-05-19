@@ -8,6 +8,21 @@ if (
     exit();
 }
 
+require_once("../php/db.php");
+
+$stmt = $conn->prepare("SELECT * FROM users WHERE id = ? AND role = 'admin'");
+$stmt->bind_param("i", $_SESSION["user_id"]);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows === 0) {
+    session_unset();
+    session_destroy();
+    header("Location: ../login.html");
+    exit();
+}
+
+
 ?>
 
 
