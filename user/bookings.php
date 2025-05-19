@@ -1,52 +1,47 @@
 <?php
     require_once("user_auth.php");
     include_once("../php/db.php");
+    include_once("user_header.php");
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Bookings</title>
+<h2 class="section-title">My Bookings</h2>
 
-</head>
+<div class="filter-form">
+    <form action="bookings.php" method="GET">
+        <input type="text" name="search" placeholder="Search event or venue"
+               value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
 
-<?php include_once("user_header.php"); ?>
+        <select name="status">
+            <option value="any" <?= isset($_GET["status"]) && $_GET["status"] == "any" ? "selected" : "" ?>>Any Status</option>
+            <option value="upcoming" <?= isset($_GET["status"]) && $_GET["status"] == "upcoming" ? "selected" : "" ?>>Upcoming</option>
+            <option value="past" <?= isset($_GET["status"]) && $_GET["status"] == "past" ? "selected" : "" ?>>Past</option>
+        </select>
 
-<form action="bookings.php" method="GET">
-    <input type="text" name="search" placeholder="Search event or venue"
-           value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+        <select name="sort">
+            <option value="ascending" <?= isset($_GET["sort"]) && $_GET["sort"] == "ascending" ? "selected" : "" ?>>Date (Ascending)</option>
+            <option value="descending" <?= isset($_GET["sort"]) && $_GET["sort"] == "descending" ? "selected" : "" ?>>Date (Descending)</option>
+        </select>
 
-    <label for="status">Status</label>
-    <select name="status" id="status">
-        <option value="any" <?= isset($_GET["status"]) && $_GET["status"] == "any" ? "selected" : "" ?>>Any</option>
-        <option value="upcoming" <?= isset($_GET["status"]) && $_GET["status"] == "upcoming" ? "selected" : "" ?>>Upcoming</option>
-        <option value="past" <?= isset($_GET["status"]) && $_GET["status"] == "past" ? "selected" : "" ?>>Past</option>
-    </select>
+        <div class="date-range">
+            <input type="date" name="date_from" placeholder="From Date" value="<?= $_GET["date_from"] ?? '' ?>">
+            <input type="date" name="date_to" placeholder="To Date" value="<?= $_GET["date_to"] ?? '' ?>">
+        </div>
 
-    <label for="sort">Sort</label>
-    <select name="sort" id="sort">
-        <option value="ascending" <?= isset($_GET["sort"]) && $_GET["sort"] == "ascending" ? "selected" : "" ?>>Ascending</option>
-        <option value="descending" <?= isset($_GET["sort"]) && $_GET["sort"] == "descending" ? "selected" : "" ?>>Descending</option>
-    </select>
+        <div class="price-range">
+            <input type="number" name="min_tickets" placeholder="Min Tickets" value="<?= $_GET["min_tickets"] ?? '' ?>">
+            <input type="number" name="max_tickets" placeholder="Max Tickets" value="<?= $_GET["max_tickets"] ?? '' ?>">
+        </div>
 
-    <input type="date" name="date_from" value="<?= $_GET["date_from"] ?? '' ?>">
-    <input type="date" name="date_to" value="<?= $_GET["date_to"] ?? '' ?>">
+        <div class="price-range">
+            <input type="number" step="0.01" name="min_price" placeholder="Min Total Price" value="<?= $_GET["min_price"] ?? '' ?>">
+            <input type="number" step="0.01" name="max_price" placeholder="Max Total Price" value="<?= $_GET["max_price"] ?? '' ?>">
+        </div>
 
-    <input type="number" name="min_tickets" placeholder="Min Tickets" value="<?= $_GET["min_tickets"] ?? '' ?>">
-    <input type="number" name="max_tickets" placeholder="Max Tickets" value="<?= $_GET["max_tickets"] ?? '' ?>">
-
-    <input type="number" step="0.01" name="min_price" placeholder="Min Total Price" value="<?= $_GET["min_price"] ?? '' ?>">
-    <input type="number" step="0.01" name="max_price" placeholder="Max Total Price" value="<?= $_GET["max_price"] ?? '' ?>">
-
-    <button type="submit">Filter</button>
-</form>
-
-
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+</div>
 
 <?php
-   
    $status = isset($_GET["status"]) ? $_GET["status"] : "any";
    $sort = isset($_GET["sort"]) ? $_GET["sort"] : "ascending";
    // filter sql logic
@@ -125,7 +120,7 @@
     }
 
     // Set pagination values early
-    $per_page = 3;
+    $per_page = 5;
     $page = isset($_GET["page"]) && is_numeric($_GET["page"]) ? (int) $_GET["page"] : 1;
     $offset = ($page - 1) * $per_page;
 
@@ -161,86 +156,96 @@
     $allBookings = $stmt->get_result();
     $stmt->close();
     
+    $currentDate = date("Y-m-d");
 
-
-   if($allBookings->num_rows > 0) {
-   
-    echo "<table>
-                <tr>
-                    <th> Event Title </th>
-                    <th> Description </th>
-                    <th> Event Date </th>
-                    <th> Venue </th>
-                    <th> Location </th>
-                    <th> Tickets </th>
-                    <th> Total Price </th>
-                    <th> Date of Booking </th>
-                    <th> Status </th>
-                    <th> Actions </th>
-                </tr>";
-
-                // will add image in future to the bookings table
-        $currentDate = date("Y-m-d");
-        while ($row = $allBookings->fetch_assoc()) {
-            
-            echo "<tr>";
-            echo "<td>".$row["title"]."</td>";
-            echo "<td>".$row["description"]."</td>";
-            echo "<td>".$row["event_date"]."</td>";
-            echo "<td>".$row["venue_name"]."</td>";
-            echo "<td>".$row["venue_location"]."</td>";
-            echo "<td>".$row["tickets"]."</td>";
-
-            // sum of tickets logic
-            $sumOfTickets = $row["price"] * $row["tickets"];
-            echo "<td> $" . number_format($sumOfTickets, 2). "</td>";
-
-
-            echo "<td>".$row["booking_date"]."</td>";
-            echo "<td>";
-            if($row["event_date"] < $currentDate) {
-                echo "Past";
-            } else if($row["event_date"] > $currentDate) {
-                echo "Upcoming";
-            } else {
-                echo "Ongoing";
-            }
-            echo "</td>";
-            if($row["event_date"] > $currentDate) {
-                echo "<td>";
-                echo "<a href='../bookings/cancel.php?id=" . $row['booking_id'] . '&event_id='. $row['event_id']."'>Cancel</a>";
-                echo "</td>";
-            } else {
-                echo "None";
-            }
-            
-            echo "</tr>";
-        }
-
-        echo "</table>";
+    if($allBookings->num_rows > 0) {
+        echo '<div class="bookings-container">';
         
-    
-    }
-    else {
-        echo "<h2>No bookings found with the selected filters.</h2>";
-    }
+        while ($booking = $allBookings->fetch_assoc()) {
+            $eventDate = new DateTime($booking["event_date"]);
+            $formattedEventDate = $eventDate->format('M d, Y');
+            
+            $bookingDate = new DateTime($booking["booking_date"]);
+            $formattedBookingDate = $bookingDate->format('M d, Y H:i');
+            
+            $totalPrice = $booking["price"] * $booking["tickets"];
+            
+            // Determine status
+            $status = "";
+            $statusClass = "";
+            if($booking["event_date"] < $currentDate) {
+                $status = "Past";
+                $statusClass = "status-past";
+            } else if($booking["event_date"] > $currentDate) {
+                $status = "Upcoming";
+                $statusClass = "status-upcoming";
+            } else {
+                $status = "Today";
+                $statusClass = "status-today";
+            }
+            
+            echo '<div class="booking-card">';
+            
+            // Left side - Event image
+            echo '<div class="booking-image">';
+            if (!empty($booking['image'])) {
+                echo '<img src="' . htmlspecialchars($booking['image']) . '" alt="' . htmlspecialchars($booking['title']) . '">';
+            } else {
+                echo '<img src="/placeholder.svg?height=200&width=300" alt="Event placeholder">';
+            }
+            echo '<div class="booking-status ' . $statusClass . '">' . $status . '</div>';
+            echo '</div>';
+            
+            // Right side - Booking details
+            echo '<div class="booking-details">';
+            echo '<h3>' . htmlspecialchars($booking["title"]) . '</h3>';
+            
+            echo '<div class="booking-meta">';
+            echo '<div class="meta-item"><i class="fas fa-calendar-alt"></i> ' . $formattedEventDate . '</div>';
+            echo '<div class="meta-item"><i class="fas fa-map-marker-alt"></i> ' . htmlspecialchars($booking["venue_name"]) . ', ' . htmlspecialchars($booking["venue_location"]) . '</div>';
+            echo '<div class="meta-item"><i class="fas fa-ticket-alt"></i> ' . $booking["tickets"] . ' ticket' . ($booking["tickets"] > 1 ? 's' : '') . '</div>';
+            echo '<div class="meta-item"><i class="fas fa-dollar-sign"></i> $' . number_format($totalPrice, 2) . ' total</div>';
+            echo '<div class="meta-item"><i class="fas fa-clock"></i> Booked on ' . $formattedBookingDate . '</div>';
+            echo '</div>';
+            
+            echo '<div class="booking-actions">';
+            echo '<a href="event_details.php?id=' . $booking['event_id'] . '" class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i> View Event</a>';
 
-    if (true) {
-        echo "<div style='margin-top: 20px;'>Pages: ";
-        for ($i = 1; $i <= $total_pages; $i++) {
-            $query = $_GET;
-            $query["page"] = $i;
-            $url = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
-            $isCurrent = $i == $page ? "style='font-weight:bold;'" : "";
-            echo "<a href='$url' $isCurrent>$i</a> ";
+            if($booking["event_date"] > $currentDate) {
+                echo '<a href="../bookings/cancel.php?id=' . $booking['booking_id'] . '&event_id='. $booking['event_id'] . '" class="btn btn-sm btn-danger" data-confirm="Are you sure you want to cancel this booking?"><i class="fas fa-times"></i> Cancel Booking</a>';
+            }
+
+            echo '</div>'; // Close booking-actions
+            echo '</div>'; // Close booking-details
+            echo '</div>'; // Close booking-card
         }
-        echo "</div>";
+        
+        echo '</div>'; // Close bookings-container
+        
+        // Pagination
+        if ($total_pages > 1) {
+            echo '<div class="pagination">';
+            for ($i = 1; $i <= $total_pages; $i++) {
+                $query = $_GET;
+                $query["page"] = $i;
+                $url = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
+                $active = $i == $page ? "active" : "";
+                echo '<a href="' . $url . '" class="' . $active . '">' . $i . '</a>';
+            }
+            echo '</div>';
+        }
+    } else {
+        echo '<div class="no-results">';
+        echo '<i class="fas fa-ticket-alt fa-3x"></i>';
+        echo '<p>No bookings found with the selected filters.</p>';
+        echo '<p>Try adjusting your filters or <a href="browse_events.php">browse events</a> to make a booking.</p>';
+        echo '</div>';
     }
-    
-    echo "</div>";
-    echo "</body>";
-    echo "</html>";
-
 ?>
+
+</div> <!-- Close dashboard-container -->
+</body>
+</html>
+
 
 

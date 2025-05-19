@@ -1,23 +1,16 @@
 <?php
     require_once("user_auth.php");
     include_once("../php/db.php");
+    include_once("user_header.php");
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event Details</title>
-
-</head>
 
 <?php
     if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-        echo "Invalid event ID.";
+        echo '<div class="alert alert-danger">Invalid event ID.</div>';
+        echo '<a href="browse_events.php" class="btn btn-primary">Back to Events</a>';
         exit();
     }
-    include_once("user_header.php");
+    
     $event_id = $_GET["id"];
     $eventQuery = "SELECT e.*, c.name AS category_name, v.name AS venue_name, v.location AS venue_location, v.capacity AS venue_capacity
                     FROM events e, event_categories c, venues v WHERE e.category_id = c.id AND e.venue_id = v.id AND e.id = ?";
@@ -27,79 +20,156 @@
     $event = $stmt->get_result();
 
     if ($event->num_rows === 0) {
-        echo "Event not found.";
+        echo '<div class="alert alert-danger">Event not found.</div>';
+        echo '<a href="browse_events.php" class="btn btn-primary">Back to Events</a>';
         exit();
     }
     $event = $event->fetch_assoc();
+    
+    // Format the date
+    $eventDate = new DateTime($event['date']);
+    $formattedDate = $eventDate->format('F d, Y');
 ?>
 
 <div class="event-detail-container">
-    <?php if (!empty($event['image'])): ?>
-        <img src="<?php echo htmlspecialchars($event['image']); ?>" alt="Event Image">
-    <?php endif; ?>
-
-    <h1><?php echo htmlspecialchars($event['title']); ?></h1>
-    <p><strong>Category:</strong> <?php echo htmlspecialchars($event['category_name']); ?></p>
-    <p><strong>Date:</strong> <?php echo htmlspecialchars($event['date']); ?></p>
-    <p><strong>Venue:</strong> <?php echo htmlspecialchars($event['venue_name']); ?></p>
-    <p><strong>Location:</strong> <?php echo htmlspecialchars($event['venue_location']); ?></p>
-    <p><strong>Description:</strong></p>
-    <p><?php echo nl2br(htmlspecialchars($event['description'])); ?></p>
-    <p><strong>Price:</strong><?php echo " $" . number_format($event['price'], 2);?></p>
-    <?php
-        $currentDate = date('Y-m-d');
-
-
-        // get capacity of bookings
-        $bookingsQuery = "SELECT COALESCE(SUM(tickets), 0) AS bookings_number FROM bookings where event_id = ?";
-        $stmt = $conn->prepare($bookingsQuery);
-        $stmt->bind_param("i", $event["id"]);
-        $stmt->execute();
-        $eventBookingsCount = $stmt->get_result();
-        $eventBookings = $eventBookingsCount->fetch_assoc();
+    <div class="event-detail-header">
+        <h2><?php echo htmlspecialchars($event['title']); ?></h2>
+        <a href="browse_events.php" class="back-link"><i class="fas fa-arrow-left"></i> Back to Events</a>
+    </div>
+    
+    <div class="event-detail-content">
+        <div class="event-detail-image">
+            <?php if (!empty($event['image'])): ?>
+                <img src="<?php echo htmlspecialchars($event['image']); ?>" alt="<?php echo htmlspecialchars($event['title']); ?>">
+            <?php else: ?>
+                <img src="/placeholder.svg?height=400&width=600" alt="Event placeholder">
+            <?php endif; ?>
+        </div>
         
+        <div class="event-detail-info">
+            <div class="event-detail-meta">
+                <div class="meta-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span><?php echo $formattedDate; ?></span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span><?php echo htmlspecialchars($event['venue_name']); ?>, <?php echo htmlspecialchars($event['venue_location']); ?></span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-tag"></i>
+                    <span><?php echo htmlspecialchars($event['category_name']); ?></span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span><?php echo "$" . number_format($event['price'], 2); ?></span>
+                </div>
+            </div>
+            
+            <div class="event-detail-description">
+                <h3>About This Event</h3>
+                <p><?php echo nl2br(htmlspecialchars($event['description'])); ?></p>
+            </div>
+            
+            <div class="event-detail-booking">
+                <?php
+                    $currentDate = date('Y-m-d');
 
-        // check for duplicate booking
-        $checkQuery = "SELECT * FROM bookings WHERE user_id = ? AND event_id = ?";
-        $stmt = mysqli_prepare($conn, $checkQuery);
-        mysqli_stmt_bind_param($stmt, "ii", $_SESSION['user_id'], $event["id"]);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-
-        $duplicateClause = false;
-
-        if (mysqli_num_rows($result) > 0) {
-            $duplicateClause = true;
-        } else {
-            $duplicateClause = false;
-        }
-        
-
-        if($currentDate <= $event['date'] && $eventBookings["bookings_number"] < $event['venue_capacity'] && !$duplicateClause){
-            echo '<form action="../bookings/create.php" method="post">
-            <input type="hidden" name="id" value="'.$event['id'].'">
-            <label for="tickets">Number of Tickets:</label>
-            <input type="number" id="tickets" name="tickets" min="1" max="10" required>
-            <button type="submit">Book Now</button>
-             </form>';
-             echo $eventBookings["bookings_number"].' out of '.$event["venue_capacity"]." remaining.";
-        } else {
-
-            if($currentDate > $event['date']) {
-                echo "Event finished.";
-            } else if($eventBookings["bookings_number"] >= $event['venue_capacity']) {
-                echo "Event capacity full.";
-            } else if($duplicateClause) {
-                echo "You already booked this event";
-            }
-        }
-        
-    ?>
-    <!-- <button><a href="../bookings/create.php?id=<?php echo $event['id'];?>">Book Now</a></button> -->
-    <a class="back-link" href="browse_events.php">← Back to Events</a>
+                    // get capacity of bookings
+                    $bookingsQuery = "SELECT COALESCE(SUM(tickets), 0) AS bookings_number FROM bookings where event_id = ?";
+                    $stmt = $conn->prepare($bookingsQuery);
+                    $stmt->bind_param("i", $event["id"]);
+                    $stmt->execute();
+                    $eventBookingsCount = $stmt->get_result();
+                    $eventBookings = $eventBookingsCount->fetch_assoc();
+                    
+                    // check for duplicate booking
+                    $checkQuery = "SELECT * FROM bookings WHERE user_id = ? AND event_id = ?";
+                    $stmt = mysqli_prepare($conn, $checkQuery);
+                    mysqli_stmt_bind_param($stmt, "ii", $_SESSION['user_id'], $event["id"]);
+                    mysqli_stmt_execute($stmt);
+                    $result = mysqli_stmt_get_result($stmt);
+                    $duplicateClause = mysqli_num_rows($result) > 0;
+                    
+                    // Calculate remaining seats
+                    $remainingSeats = $event['venue_capacity'] - $eventBookings["bookings_number"];
+                    
+                    // Display booking status
+                    echo '<div class="booking-status">';
+                    if ($currentDate > $event['date']) {
+                        echo '<div class="status-badge status-past"><i class="fas fa-times-circle"></i> Event has ended</div>';
+                    } elseif ($eventBookings["bookings_number"] >= $event['venue_capacity']) {
+                        echo '<div class="status-badge status-full"><i class="fas fa-exclamation-circle"></i> Sold Out</div>';
+                    } elseif ($duplicateClause) {
+                        echo '<div class="status-badge status-booked"><i class="fas fa-check-circle"></i> You\'ve already booked this event</div>';
+                    } else {
+                        echo '<div class="status-badge status-available"><i class="fas fa-check-circle"></i> Tickets Available</div>';
+                    }
+                    echo '</div>';
+                    
+                    // Display capacity information
+                    echo '<div class="capacity-info">';
+                    echo '<div class="capacity-bar">';
+                    $capacityPercentage = ($eventBookings["bookings_number"] / $event['venue_capacity']) * 100;
+                    echo '<div class="capacity-progress" style="width: ' . $capacityPercentage . '%"></div>';
+                    echo '</div>';
+                    echo '<p>' . $remainingSeats . ' seats remaining out of ' . $event["venue_capacity"] . '</p>';
+                    echo '</div>';
+                    
+                    // Display booking form if applicable
+                    if($currentDate <= $event['date'] && $eventBookings["bookings_number"] < $event['venue_capacity'] && !$duplicateClause) {
+                        echo '<form action="../bookings/create.php" method="post" class="booking-form">
+                            <input type="hidden" name="id" value="' . $event['id'] . '">
+                            <div class="form-group">
+                                <label for="tickets">Number of Tickets:</label>
+                                <div class="ticket-selector">
+                                    <button type="button" class="ticket-btn minus" onclick="decrementTickets()">-</button>
+                                    <input type="number" id="tickets" name="tickets" min="1" max="' . min(10, $remainingSeats) . '" value="1" required>
+                                    <button type="button" class="ticket-btn plus" onclick="incrementTickets()">+</button>
+                                </div>
+                            </div>
+                            <div class="total-price">
+                                Total: <span id="totalPrice">$' . number_format($event['price'], 2) . '</span>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Book Now</button>
+                        </form>';
+                        
+                        // JavaScript for ticket selection and price calculation
+                        echo '<script>
+                            function decrementTickets() {
+                                var input = document.getElementById("tickets");
+                                if (input.value > 1) {
+                                    input.value = parseInt(input.value) - 1;
+                                    updateTotalPrice();
+                                }
+                            }
+                            
+                            function incrementTickets() {
+                                var input = document.getElementById("tickets");
+                                var max = parseInt(input.getAttribute("max"));
+                                if (parseInt(input.value) < max) {
+                                    input.value = parseInt(input.value) + 1;
+                                    updateTotalPrice();
+                                }
+                            }
+                            
+                            function updateTotalPrice() {
+                                var tickets = document.getElementById("tickets").value;
+                                var price = ' . $event['price'] . ';
+                                var total = tickets * price;
+                                document.getElementById("totalPrice").textContent = "$" + total.toFixed(2);
+                            }
+                            
+                            document.getElementById("tickets").addEventListener("change", updateTotalPrice);
+                        </script>';
+                    }
+                ?>
+            </div>
+        </div>
+    </div>
 </div>
 
+</div> <!-- Close dashboard-container -->
 </body>
 </html>
-
 

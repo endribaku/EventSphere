@@ -4,15 +4,9 @@
     require_once("organizer_header.php");
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Events</title>
-</head>
+<h2 class="section-title">My Events</h2>
 
-<div class="search-form">
+<div class="filter-form">
     <form action="events.php" method="GET">
         <input type="text" name="search" placeholder="Search by title or keyword"
             value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
@@ -32,251 +26,289 @@
             <option value="">Any Date</option>
             <option value="today" <?php if(isset($_GET['date_filter']) && $_GET['date_filter'] == "today") echo 'selected'; ?>>Today</option>
             <option value="upcoming" <?php if(isset($_GET['date_filter']) && $_GET['date_filter'] == "upcoming") echo 'selected'; ?>>Upcoming</option>
+            <option value="past" <?php if(isset($_GET['date_filter']) && $_GET['date_filter'] == "past") echo 'selected'; ?>>Past</option>
             <option value="this_month" <?php if(isset($_GET['date_filter']) && $_GET['date_filter'] == 'this_month') echo 'selected'; ?>>This Month</option>
         </select>
 
         <select name="sort">
             <option value="">Sort By</option>
-            <option value="date_asc" <?php if(isset($_GET['sort']) && $_GET['sort'] == 'date_asc') echo 'selected'; ?>> Ascending</option>
-            <option value="date_desc" <?php if(isset($_GET['sort']) && $_GET['sort'] == 'date_desc') echo 'selected'; ?>> Descending</option>
+            <option value="date_asc" <?php if(isset($_GET['sort']) && $_GET['sort'] == 'date_asc') echo 'selected'; ?>>Date (Ascending)</option>
+            <option value="date_desc" <?php if(isset($_GET['sort']) && $_GET['sort'] == 'date_desc') echo 'selected'; ?>>Date (Descending)</option>
+            <option value="price_asc" <?php if(isset($_GET['sort']) && $_GET['sort'] == 'price_asc') echo 'selected'; ?>>Price (Low to High)</option>
+            <option value="price_desc" <?php if(isset($_GET['sort']) && $_GET['sort'] == 'price_desc') echo 'selected'; ?>>Price (High to Low)</option>
         </select>
 
-        <input type="number" step="0.01" name="min_tickets" placeholder="Min Tickets Sold" value="<?php echo isset($_GET['min_tickets']) ? htmlspecialchars($_GET['min_tickets']) : ''; ?>">
-        <input type="number" step="0.01" name="max_tickets" placeholder="Max Tickets Sold" value="<?php echo isset($_GET['max_tickets']) ? htmlspecialchars($_GET['max_tickets']) : ''; ?>">
+        <div class="price-range">
+            <input type="number" step="0.01" name="min_price" placeholder="Min Price" value="<?php echo isset($_GET['min_price']) ? htmlspecialchars($_GET['min_price']) : ''; ?>">
+            <input type="number" step="0.01" name="max_price" placeholder="Max Price" value="<?php echo isset($_GET['max_price']) ? htmlspecialchars($_GET['max_price']) : ''; ?>">
+        </div>
 
-        <input type="number" step="0.01" name="min_price" placeholder="Min Price" value="<?php echo isset($_GET['min_price']) ? htmlspecialchars($_GET['min_price']) : ''; ?>">
-        <input type="number" step="0.01" name="max_price" placeholder="Max Price" value="<?php echo isset($_GET['max_price']) ? htmlspecialchars($_GET['max_price']) : ''; ?>">
+        <div class="ticket-range">
+            <input type="number" step="1" name="min_tickets" placeholder="Min Tickets Sold" value="<?php echo isset($_GET['min_tickets']) ? htmlspecialchars($_GET['min_tickets']) : ''; ?>">
+            <input type="number" step="1" name="max_tickets" placeholder="Max Tickets Sold" value="<?php echo isset($_GET['max_tickets']) ? htmlspecialchars($_GET['max_tickets']) : ''; ?>">
+        </div>
 
-        <button type="submit">Filter</button>
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="events.php" class="btn btn-secondary">Reset Filters</a>
     </form>
 </div>
 
 <?php
-    
-    // include_once("../events/read.php");
-    $searchBar = isset($_GET["search"]) ? $_GET["search"] : "";
-    $category = isset($_GET["category"]) ? $_GET["category"] : "";
-    $date_filter = isset($_GET["date_filter"]) ? $_GET["date_filter"] : "";
-    $sort = isset($_GET["sort"]) ? $_GET["sort"] : "";
-    $min_tickets = isset($_GET["min_tickets"]) && is_numeric($_GET["min_tickets"]) ? floatval($_GET["min_tickets"]) : null;
-    $max_tickets = isset($_GET["max_tickets"]) && is_numeric($_GET["max_tickets"]) ? floatval($_GET["max_tickets"]) : null;
-    $min_price = isset($_GET["min_price"]) && is_numeric($_GET["min_price"]) ? floatval($_GET["min_price"]) : null;
-    $max_price = isset($_GET["max_price"]) && is_numeric($_GET["max_price"]) ? floatval($_GET["max_price"]) : null;
-
-    $per_page = 3;
-    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
-    $offset = ($page - 1) * $per_page;
-
-    $filterQuery = "SELECT * from events e where organizer_id = ?";
-    $parameters = [$_SESSION["user_id"]];
-    $types = 'i'; 
-
-    
-    if(!empty($searchBar)) {
-        $filterQuery .= " AND (title LIKE ?) ";  
-        $searchTerm = "%$searchBar%";
-        $parameters[] = $searchTerm;
-        $types .= "s";
+// Display status messages
+if (isset($_GET['status'])) {
+    if ($_GET['status'] === 'deleted') {
+        echo '<div class="alert alert-success">Event deleted successfully.</div>';
+    } elseif ($_GET['status'] === 'notdeleted') {
+        echo '<div class="alert alert-danger">Failed to delete event.</div>';
+    } elseif ($_GET['status'] === 'updated') {
+        echo '<div class="alert alert-success">Event updated successfully.</div>';
     }
-
-    if(!empty($category)) {
-        $filterQuery .= " AND category_id = ?";
-        $parameters[] = $category;
-        $types .= "i";
-       }
-       $currentDate = date('Y-m-d');
-       if(!empty($date_filter)) {
-            switch($date_filter) {
-                case "today":
-                    $filterQuery .= " AND date = ?";
-                    $parameters[] = $currentDate;
-                    $types .= 's';
-                    break;
-                case "upcoming":
-                    $filterQuery .= " AND date >= ?";
-                    $parameters[] = $currentDate;
-                    $types .= 's';
-                    break;
-                
-                case 'this_month':
-                    $firstDayOfMonth = date('Y-m-01');
-                    $lastDayOfMonth = date('Y-m-t');
-                    $filterQuery .= " AND date BETWEEN ? AND ?";
-                    $parameters[] = $firstDayOfMonth;
-                    $parameters[] = $lastDayOfMonth;
-                    $types .= "ss";
-                    break;
-                }
-       }
-
-    if(!is_null($min_tickets) || !is_null($max_tickets)) {
-        $filterQuery .= " AND id IN (
-        SELECT event_id FROM bookings GROUP BY event_id HAVING ";
-
-            if (!is_null($min_tickets)) {
-                $filterQuery .= " SUM(tickets) >= ? ";
-                $parameters[] = $min_tickets;
-                $types .= 'i';
-            }
-
-            if (!is_null($max_tickets)) {
-                if (!is_null($min_tickets)) {
-                    $filterQuery .= " AND ";
-                }
-                $filterQuery .= " SUM(tickets) <= ? ";
-                $parameters[] = $max_tickets;
-                $types .= 'i';
-            }
-        
-            $filterQuery .= ")";
-    }
+}
     
-    
-    
-    if (!empty($min_price)) {
-        $filterQuery .= " AND price >= ?";
-        $parameters[] = $min_price;
-        $types .= 'd';
-    }
-    
-    if (!empty($max_price)) {
-            $filterQuery .= " AND price <= ?";
-            $parameters[] = $max_price;
-            $types .= 'd';
-    }
+$searchBar = isset($_GET["search"]) ? $_GET["search"] : "";
+$category = isset($_GET["category"]) ? $_GET["category"] : "";
+$date_filter = isset($_GET["date_filter"]) ? $_GET["date_filter"] : "";
+$sort = isset($_GET["sort"]) ? $_GET["sort"] : "";
+$min_tickets = isset($_GET["min_tickets"]) && is_numeric($_GET["min_tickets"]) ? floatval($_GET["min_tickets"]) : null;
+$max_tickets = isset($_GET["max_tickets"]) && is_numeric($_GET["max_tickets"]) ? floatval($_GET["max_tickets"]) : null;
+$min_price = isset($_GET["min_price"]) && is_numeric($_GET["min_price"]) ? floatval($_GET["min_price"]) : null;
+$max_price = isset($_GET["max_price"]) && is_numeric($_GET["max_price"]) ? floatval($_GET["max_price"]) : null;
 
-    switch ($sort) {
-        case 'date_asc':
-            $filterQuery .= " ORDER BY date ASC";
+$per_page = 10;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $per_page;
+
+$filterQuery = "SELECT e.*, c.name AS category_name, v.name AS venue_name, v.location AS venue_location, v.capacity AS venue_capacity,
+                (SELECT COALESCE(SUM(tickets), 0) FROM bookings WHERE event_id = e.id) AS tickets_sold
+                FROM events e
+                JOIN event_categories c ON e.category_id = c.id
+                JOIN venues v ON e.venue_id = v.id
+                WHERE e.organizer_id = ?";
+$parameters = [$_SESSION["user_id"]];
+$types = 'i'; 
+
+if(!empty($searchBar)) {
+    $filterQuery .= " AND (e.title LIKE ? OR e.description LIKE ?) ";  
+    $searchTerm = "%$searchBar%";
+    $parameters[] = $searchTerm;
+    $parameters[] = $searchTerm;
+    $types .= "ss";
+}
+
+if(!empty($category)) {
+    $filterQuery .= " AND e.category_id = ?";
+    $parameters[] = $category;
+    $types .= "i";
+}
+
+$currentDate = date('Y-m-d');
+if(!empty($date_filter)) {
+    switch($date_filter) {
+        case "today":
+            $filterQuery .= " AND e.date = ?";
+            $parameters[] = $currentDate;
+            $types .= 's';
             break;
-        case 'date_desc':
-            $filterQuery .= " ORDER BY date DESC";
+        case "upcoming":
+            $filterQuery .= " AND e.date >= ?";
+            $parameters[] = $currentDate;
+            $types .= 's';
             break;
-        default:
-            // Default sorting (you can change this)
-            $filterQuery .= " ORDER BY date ASC";
+        case "past":
+            $filterQuery .= " AND e.date < ?";
+            $parameters[] = $currentDate;
+            $types .= 's';
             break;
-        }
-    $countQuery = "SELECT COUNT(*) AS total FROM (" . $filterQuery . ") AS total_events";
-    $countTypes = $types;
-    $countParams = $parameters;
-
-    $filterQuery .= " LIMIT ? OFFSET ?";
-    $types .= "ii";
-    $parameters[] = $per_page;
-    $parameters[] = $offset;
-
-    $countStmt = mysqli_prepare($conn, $countQuery);
-    if (!empty($countParams)) {
-        mysqli_stmt_bind_param($countStmt, $countTypes, ...$countParams);
+        case 'this_month':
+            $firstDayOfMonth = date('Y-m-01');
+            $lastDayOfMonth = date('Y-m-t');
+            $filterQuery .= " AND e.date BETWEEN ? AND ?";
+            $parameters[] = $firstDayOfMonth;
+            $parameters[] = $lastDayOfMonth;
+            $types .= "ss";
+            break;
     }
-    mysqli_stmt_execute($countStmt);
-    $countResult = mysqli_stmt_get_result($countStmt);
-    $total_results = mysqli_fetch_assoc($countResult)['total'];
-    $total_pages = ceil($total_results / $per_page);
-    mysqli_stmt_close($countStmt);
+}
 
-    $stmt = mysqli_prepare($conn, $filterQuery);
-    mysqli_stmt_bind_param($stmt,$types, ...$parameters);
-    mysqli_stmt_execute($stmt);
-    $eventResults = mysqli_stmt_get_result($stmt);
-
-
-    if($eventResults->num_rows > 0) {
-
-    echo "<table>
-        <tr>
-            <th> Event Name </th>
-            <th> Event Date </th>
-            <th> Location </th>
-            <th> Category </th>
-            <th> Tickets Sold </th>
-            <th> Price </th>
-            <th> Status </th>
-            <th> Actions </th>
-        </tr>";
+if(!is_null($min_tickets) || !is_null($max_tickets)) {
+    $filterQuery .= " HAVING ";
+    $conditions = [];
     
+    if (!is_null($min_tickets)) {
+        $conditions[] = "tickets_sold >= ?";
+        $parameters[] = $min_tickets;
+        $types .= 'i';
+    }
+
+    if (!is_null($max_tickets)) {
+        $conditions[] = "tickets_sold <= ?";
+        $parameters[] = $max_tickets;
+        $types .= 'i';
+    }
+    
+    $filterQuery .= implode(" AND ", $conditions);
+}
+
+if (!empty($min_price)) {
+    $filterQuery .= (!is_null($min_tickets) || !is_null($max_tickets)) ? " AND " : " HAVING ";
+    $filterQuery .= "e.price >= ?";
+    $parameters[] = $min_price;
+    $types .= 'd';
+}
+
+if (!empty($max_price)) {
+    $filterQuery .= (!is_null($min_tickets) || !is_null($max_tickets) || !empty($min_price)) ? " AND " : " HAVING ";
+    $filterQuery .= "e.price <= ?";
+    $parameters[] = $max_price;
+    $types .= 'd';
+}
+
+switch ($sort) {
+    case 'date_asc':
+        $filterQuery .= " ORDER BY e.date ASC";
+        break;
+    case 'date_desc':
+        $filterQuery .= " ORDER BY e.date DESC";
+        break;
+    case 'price_asc':
+        $filterQuery .= " ORDER BY e.price ASC";
+        break;
+    case 'price_desc':
+        $filterQuery .= " ORDER BY e.price DESC";
+        break;
+    default:
+        $filterQuery .= " ORDER BY e.date ASC";
+        break;
+}
+
+$countQuery = "SELECT COUNT(*) AS total FROM (" . $filterQuery . ") AS total_events";
+$countTypes = $types;
+$countParams = $parameters;
+
+$filterQuery .= " LIMIT ? OFFSET ?";
+$types .= "ii";
+$parameters[] = $per_page;
+$parameters[] = $offset;
+
+$countStmt = mysqli_prepare($conn, $countQuery);
+if (!empty($countParams)) {
+    mysqli_stmt_bind_param($countStmt, $countTypes, ...$countParams);
+}
+mysqli_stmt_execute($countStmt);
+$countResult = mysqli_stmt_get_result($countStmt);
+$total_results = mysqli_fetch_assoc($countResult)['total'];
+$total_pages = ceil($total_results / $per_page);
+mysqli_stmt_close($countStmt);
+
+$stmt = mysqli_prepare($conn, $filterQuery);
+mysqli_stmt_bind_param($stmt,$types, ...$parameters);
+mysqli_stmt_execute($stmt);
+$eventResults = mysqli_stmt_get_result($stmt);
+
+if($eventResults->num_rows > 0) {
+    echo '<div class="table-responsive">';
+    echo '<table>
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Event Name</th>
+                    <th>Date</th>
+                    <th>Venue</th>
+                    <th>Category</th>
+                    <th>Tickets Sold</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>';
 
     while($event = mysqli_fetch_assoc($eventResults)) {
-        echo "
-        <tr class='event'>";
-        echo "<td>".htmlspecialchars($event['title'])."</td>";
-        echo "<td>".htmlspecialchars($event["date"])."</td>";
+        $eventDate = new DateTime($event['date']);
+        $formattedDate = $eventDate->format('M d, Y');
         
-        $venueQuery = "SELECT * from venues WHERE id = ?";
-        $venueStmt = mysqli_prepare($conn, $venueQuery);
-        mysqli_stmt_bind_param($venueStmt, "i", $event['venue_id']);
-        mysqli_stmt_execute($venueStmt);
-
-        $venueResult = mysqli_stmt_get_result($venueStmt);
-        $venue = mysqli_fetch_assoc($venueResult);
-
-        echo "<td>" . htmlspecialchars($venue['name']) . "</td>";
-        
-        // category add
-        $categoryQuery = "SELECT * from event_categories WHERE id = ?";
-        $categoryStmt = mysqli_prepare($conn, $categoryQuery);
-        mysqli_stmt_bind_param($categoryStmt, "i", $event["category_id"]);
-        mysqli_stmt_execute($categoryStmt);
-
-        $categoryResult = mysqli_stmt_get_result($categoryStmt);
-        $category = mysqli_fetch_assoc($categoryResult);
-
-        echo "<td>".htmlspecialchars($category["name"])."</td>";
-        // tickets Sold
-        $ticketsQuery = "SELECT COALESCE(SUM(tickets), 0) AS tickets_sold FROM bookings WHERE event_id = ?";
-        $ticketStmt = mysqli_prepare($conn, $ticketsQuery);
-        mysqli_stmt_bind_param($ticketStmt, "i", $event['id']);
-        mysqli_stmt_execute($ticketStmt);
-        $ticketResult = mysqli_stmt_get_result($ticketStmt);
-        $ticket = mysqli_fetch_assoc($ticketResult);
-        echo "<td> ".htmlspecialchars($ticket["tickets_sold"]). " / ".$venue["capacity"]."</td>";
-        // ticket price
-        
-        echo "<td> $" . number_format($event['price'], 2)."</td>";
-        
-        // for status
-        echo "<td>";
-        $today = date("Y-m-d");
-        $eventDate = $event["date"];
-        if($eventDate > $today) {
-            echo "Upcoming";
-        } else if($eventDate == $today) {
-            echo "Ongoing";
+        // Determine status
+        $status = "";
+        $statusClass = "";
+        if($event["date"] < $currentDate) {
+            $status = "Past";
+            $statusClass = "status-past";
+        } else if($event["date"] > $currentDate) {
+            $status = "Upcoming";
+            $statusClass = "status-upcoming";
         } else {
-            echo "Past";
+            $status = "Today";
+            $statusClass = "status-today";
         }
-        echo "</td>";
-        // for actions
-        echo "<td>";
-        echo "<a href='event_details.php?id=" . $event['id'] . "'>Event Details</a> | ";
-        echo "<a href='view_bookings.php?id=" . $event['id'] . "'>View Bookings</a> | ";
-        echo "<a href='update_event.php?id=" . $event['id'] . "'>Edit</a> | ";
-        echo "<a href='../events/delete.php?id=" . $event['id'] . "'>Cancel</a>";
-        echo "</div>";
-        echo "</td>";
-
-        echo "</tr>";
+        
+        echo '<tr>';
+        
+        // Event image
+        echo '<td class="event-image-cell">';
+        if (!empty($event['image'])) {
+            echo '<img src="' . htmlspecialchars($event['image']) . '" alt="' . htmlspecialchars($event['title']) . '" class="event-thumbnail">';
+        } else {
+            echo '<div class="no-image"><i class="fas fa-image"></i></div>';
+        }
+        echo '</td>';
+        
+        // Event title
+        echo '<td>' . htmlspecialchars($event['title']) . '</td>';
+        
+        // Date
+        echo '<td>' . $formattedDate . '</td>';
+        
+        // Venue
+        echo '<td>' . htmlspecialchars($event['venue_name']) . '<br><small>' . htmlspecialchars($event['venue_location']) . '</small></td>';
+        
+        // Category
+        echo '<td>' . htmlspecialchars($event['category_name']) . '</td>';
+        
+        // Tickets sold
+        echo '<td>' . $event['tickets_sold'] . ' / ' . $event['venue_capacity'] . '</td>';
+        
+        // Price
+        echo '<td>$' . number_format($event['price'], 2) . '</td>';
+        
+        // Status
+        echo '<td><span class="status-badge ' . $statusClass . '">' . $status . '</span></td>';
+        
+        // Actions
+        echo '<td class="actions">';
+        echo '<a href="event_details.php?id=' . $event['id'] . '" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>';
+        echo '<a href="view_bookings.php?id=' . $event['id'] . '" class="btn btn-sm btn-secondary"><i class="fas fa-ticket-alt"></i></a>';
+        echo '<a href="update_event.php?id=' . $event['id'] . '" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>';
+        echo '<a href="../events/delete.php?id=' . $event['id'] . '" class="btn btn-sm btn-danger" onclick="return confirm(\'Are you sure you want to delete this event?\')"><i class="fas fa-trash"></i></a>';
+        echo '</td>';
+        
+        echo '</tr>';
     }
-    echo "</table>";
-
     
+    echo '</tbody></table>';
+    echo '</div>';
+
+    // Pagination
     if ($total_pages > 1) {
-        echo "<div style='margin-top:20px;'>Pages: ";
+        echo '<div class="pagination">';
         for ($i = 1; $i <= $total_pages; $i++) {
-                $query = $_GET;
-                $query['page'] = $i;
-                $url = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
-                $isCurrent = $i == $page ? "style='font-weight:bold;'" : "";
-                echo "<a href='$url' $isCurrent>$i</a> ";
+            $query = $_GET;
+            $query['page'] = $i;
+            $url = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
+            $active = $i == $page ? "active" : "";
+            echo '<a href="' . $url . '" class="' . $active . '">' . $i . '</a>';
         }
-        echo "</div>";
+        echo '</div>';
     }
-    
-    echo "</div>";
-    
-
-    }
-    else echo "No events found";
-
+} else {
+    echo '<div class="no-results">';
+    echo '<i class="fas fa-calendar-times fa-3x"></i>';
+    echo '<p>No events found matching your criteria.</p>';
+    echo '<p>Create your first event by clicking the button below.</p>';
+    echo '<a href="create_event.php" class="btn btn-primary">Create New Event</a>';
+    echo '</div>';
+}
 ?>
+
+</div> <!-- Close dashboard-container -->
+</body>
+</html>

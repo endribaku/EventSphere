@@ -1,21 +1,11 @@
 <?php 
 require_once("admin_auth.php");
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Venue</title>
-</head>
-
-<?php 
 require_once("admin_header.php");
 require_once("../php/db.php");
 
 if(!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
-    header("Location: venues.php");
+    echo '<div class="alert alert-danger">Invalid venue ID.</div>';
+    echo '<a href="venues.php" class="btn btn-primary">Back to Venues</a>';
     exit();
 }
 
@@ -27,7 +17,8 @@ $venueStmt->execute();
 $venueResult = $venueStmt->get_result();
 
 if($venueResult->num_rows <= 0) {
-    echo "<h1> No venue found </h1>";
+    echo '<div class="alert alert-danger">Venue not found.</div>';
+    echo '<a href="venues.php" class="btn btn-primary">Back to Venues</a>';
     exit();
 }
 
@@ -35,37 +26,53 @@ $venueResult = $venueResult->fetch_assoc();
 require_once("../misc/countries.list.php");
 ?>
 
-<div class="venue-update-form">
-    <form action="../venues/update.php" method="POST">
+<div class="card">
+    <div class="card-header">
+        <h2>Update Venue: <?php echo htmlspecialchars($venueResult["name"]); ?></h2>
+        <a href="venues.php" class="back-link"><i class="fas fa-arrow-left"></i> Back to Venues</a>
+    </div>
+    <div class="card-body">
+        <form action="../venues/update.php" method="POST" class="form">
+            <input type="hidden" name="id" value="<?php echo (int)$venueResult['id']; ?>">
+            
+            <div class="form-group">
+                <label for="name">Venue Name</label>
+                <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($venueResult["name"]); ?>" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" value="<?php echo htmlspecialchars($venueResult["location"]); ?>" class="form-input" required>
+                <small class="form-text">Address or area of the venue</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="country">Country</label>
+                <select id="country" name="country" class="form-select" required>
+                    <?php 
+                    foreach($countries as $country) {
+                        $selected = ($country == $venueResult["country"]) ? "selected": "";
+                        echo '<option value="' . htmlspecialchars($country) . '"' . $selected . '>' . htmlspecialchars($country) . '</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="capacity">Capacity</label>
+                <input type="number" id="capacity" name="capacity" min="1" max="1000000" value="<?php echo (int)$venueResult["capacity"]; ?>" class="form-input" required>
+                <small class="form-text">Maximum number of attendees</small>
+            </div>
 
-        <input type="hidden" name="id" value="<?php echo (int)$venueResult['id']; ?>">
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" name="name" value="<?php echo htmlspecialchars($venueResult["name"])?>" required>
-        </div>
-        <div class="form-group">
-            <label for="location">Location</label>
-            <input type="text" name="location" value="<?php echo htmlspecialchars($venueResult["location"]) ?>" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="country">Country</label>
-            <select name="country" id="country">
-                <?php 
-                foreach($countries as $country) {
-                    //<option value="Afghanistan">Afghanistan</option>
-                    $selected = ($country == $venueResult["country"]) ? "selected": "";
-                    echo '<option value="'.$country.'"'." $selected>".$country."</option>";
-                }
-                ?>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="capacity">Capacity</label>
-            <input type="number" name="capacity" min="1"  max="1000000" value="<?php echo (int) $venueResult["capacity"] ?>" required>
-        </div>
-
-        <input type="submit" name="submit" value="Update Venue" class="btn btn-submit">
-    </form>
+            <div class="form-actions">
+                <button type="submit" name="submit" class="btn btn-primary">Update Venue</button>
+                <a href="venues.php" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
 </div>
+
+</div> <!-- Close dashboard-container -->
+</body>
+</html>
+

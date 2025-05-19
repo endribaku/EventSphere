@@ -3,7 +3,7 @@
     require_once("../php/db.php");
 
     if(!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
-        echo "Invalid event ID";
+        echo "Invalid user ID";
         exit();
     }
 
@@ -13,10 +13,10 @@
     $deletestmt->bind_param("i", $id);
 
     if($deletestmt->execute()) {
-        header("Location: ../admin/users.php");
+        header("Location: ../admin/users.php?delete_success=1");
         exit();
     } else {
-        die("Could not delete user");
+        header("Location: ../admin/users.php?error=1");
+        exit();
     }
-
 ?>

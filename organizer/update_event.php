@@ -38,52 +38,74 @@ $eventDesc = $event["description"];
 $eventTime = $event["date"];
 ?>
 
-<form action="../events/update.php?id=<?php echo $event['id']; ?>" method="POST" enctype="multipart/form-data">
-    <?php if (!empty($event['image'])): ?>
-        <div class="form-group">
-            <label>Current Image:</label><br>
-            <img src="<?php echo htmlspecialchars($event['image']); ?>" alt="Event Image" style="max-height: 100px;">
-        </div>
-    <?php endif; ?>
-    <label for="title">Event Title</label>
-    <input type="text" name="title" value="<?php echo htmlspecialchars($event['title']); ?>" required><br>
-
-    <label for="description">Description</label>
-    <textarea name="description" required><?php echo htmlspecialchars($event['description']); ?></textarea><br>
-
-    <label for="date">Event Date</label>
-    <input type="date" name="date" value="<?php echo $event['date']; ?>" required><br>
-
-    <label for="venue">Venue</label>
-    <select name="venue" required>
-        <?php
+<div class="event-update-form">
+    <h2>Update Event: <?php echo htmlspecialchars($eventTitle); ?></h2>
+    
+    <form action="../events/update.php?id=<?php echo $event['id']; ?>" method="POST" enctype="multipart/form-data">
+        <?php if (!empty($event['image'])): ?>
+            <div class="form-group">
+                <label>Current Image:</label><br>
+                <img src="<?php echo htmlspecialchars($event['image']); ?>" alt="Event Image" class="event-preview-image">
+            </div>
+        <?php endif; ?>
         
-        $venuesQuery = "SELECT * FROM venues";
-        $venuesResult = mysqli_query($conn, $venuesQuery);
-        while ($venue = mysqli_fetch_assoc($venuesResult)) {
-            $selected = ($venue['id'] == $event['venue_id']) ? "selected" : "";
-            echo "<option value='{$venue['id']}' {$selected}>{$venue['name']}</option>";
-        }
-        ?>
-    </select><br>
+        <div class="form-group">
+            <label for="title">Event Title</label>
+            <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($event['title']); ?>" required>
+        </div>
 
-    <label for="image">Event Image (Leave blank to keep current image)</label>
-    <input type="file" name="image"><br>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea name="description" id="description" rows="5" required><?php echo htmlspecialchars($event['description']); ?></textarea>
+        </div>
 
-    <label for="category">Event Category</label>
-    <select name="category" required>
-        <?php
+        <div class="form-group">
+            <label for="date">Event Date</label>
+            <input type="date" name="date" id="date" value="<?php echo $event['date']; ?>" required>
+        </div>
 
-        $categoryQuery = "SELECT * FROM event_categories";
-        $categoryResult = mysqli_query($conn, $categoryQuery);
-        while ($category = mysqli_fetch_assoc($categoryResult)) {
-            $selected = ($category["id"] == $event["category_id"]) ? "selected" : "";
-            echo "<option value='{$category['id']}' {$selected}>{$category['name']}</option>";
-        }
-        ?>
-    </select>
+        <div class="form-group">
+            <label for="venue">Venue</label>
+            <select name="venue" id="venue" required>
+                <?php
+                $venuesQuery = "SELECT * FROM venues";
+                $venuesResult = mysqli_query($conn, $venuesQuery);
+                while ($venue = mysqli_fetch_assoc($venuesResult)) {
+                    $selected = ($venue['id'] == $event['venue_id']) ? "selected" : "";
+                    echo "<option value='{$venue['id']}' {$selected}>{$venue['name']}</option>";
+                }
+                ?>
+            </select>
+        </div>
 
-    <input type="number" name="price" step="0.01" value="<?php echo htmlspecialchars($event['price']); ?>" required>
+        <div class="form-group">
+            <label for="image">Event Image (Leave blank to keep current image)</label>
+            <input type="file" name="image" id="image">
+            <small>Recommended size: 800x400 pixels. Max file size: 5MB.</small>
+        </div>
 
-    <button type="submit" name="submit">Update Event</button>
-</form>
+        <div class="form-group">
+            <label for="category">Event Category</label>
+            <select name="category" id="category" required>
+                <?php
+                $categoryQuery = "SELECT * FROM event_categories";
+                $categoryResult = mysqli_query($conn, $categoryQuery);
+                while ($category = mysqli_fetch_assoc($categoryResult)) {
+                    $selected = ($category["id"] == $event["category_id"]) ? "selected" : "";
+                    echo "<option value='{$category['id']}' {$selected}>{$category['name']}</option>";
+                }
+                ?>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="price">Ticket Price ($)</label>
+            <input type="number" name="price" id="price" step="0.01" min="0" value="<?php echo htmlspecialchars($event['price']); ?>" required>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" name="submit" class="btn btn-primary">Update Event</button>
+            <a href="events.php" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

@@ -1,48 +1,94 @@
 <?php 
 require_once("admin_auth.php");
-?>
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Categories</title>
-</head>
-
-<?php 
 require_once("admin_header.php");
 require_once("../php/db.php");
 require_once("../categories/read.php");
-
-echo "<table>
-  <tr>
-    <th>ID</th>
-    <th>Name</th>
-    <th>Actions</th>
-  </tr>";
-
-while($row = $result->fetch_assoc() ) {
-    echo "<tr>";
-        echo "<td>{$row['id']}</td>";
-        echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-        echo "<td>
-                <a href='update_category.php?id={$row['id']}'>Edit</a> |
-                <a href='../categories/delete.php?id={$row['id']}' onclick='return confirm(\"Are you sure?\")'>Delete</a>
-              </td>";
-        echo "</tr>";
-}
-echo "</table>";
 ?>
 
-<form action="../categories/create.php" class="category-creation-form" method="POST">
-    <h2>Create Category</h2>
+<h2 class="section-title">Manage Event Categories</h2>
 
-    <div class="form-group">
-        <label for="name">Name</label>
-        <input type="text" name="name" id="name" required>
+<?php
+// Display status messages
+if (isset($_GET['status'])) {
+    if ($_GET['status'] === 'created') {
+        echo '<div class="alert alert-success">Category created successfully.</div>';
+    } elseif ($_GET['status'] === 'updated') {
+        echo '<div class="alert alert-success">Category updated successfully.</div>';
+    } elseif ($_GET['status'] === 'deleted') {
+        echo '<div class="alert alert-success">Category deleted successfully.</div>';
+    } elseif ($_GET['status'] === 'error') {
+        echo '<div class="alert alert-danger">An error occurred. Please try again.</div>';
+    }
+}
+?>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3>Event Categories</h3>
+            </div>
+            <div class="card-body">
+                <?php if ($result->num_rows > 0): ?>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Events</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while($category = $result->fetch_assoc()): 
+                                // Count events in this category
+                                $countQuery = "SELECT COUNT(*) as count FROM events WHERE category_id = ?";
+                                $stmt = $conn->prepare($countQuery);
+                                $stmt->bind_param("i", $category['id']);
+                                $stmt->execute();
+                                $eventCount = $stmt->get_result()->fetch_assoc()['count'];
+                            ?>
+                            <tr>
+                                <td><?php echo $category['id']; ?></td>
+                                <td><?php echo htmlspecialchars($category['name']); ?></td>
+                                <td><?php echo $eventCount; ?></td>
+                                <td class="actions">
+                                    <a href="update_category.php?id=<?php echo $category['id']; ?>" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i> Edit</a>
+                                    <a href="../categories/delete.php?id=<?php echo $category['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this category? This may affect existing events.')"><i class="fas fa-trash"></i> Delete</a>
+                                </td>
+                            </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php else: ?>
+                <p class="no-data">No categories found. Create your first category using the form.</p>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
+    
+    <div class="col-md-4">
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-plus-circle"></i> Create Category</h3>
+        </div>
+        <div class="card-body">
+            <form action="../categories/create.php" method="POST" class="form">
+                <div class="form-group">
+                    <label for="name">Category Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter category name" class="form-input" required>
+                    <small class="form-text">Choose a clear and descriptive name for the category</small>
+                </div>
+                
+                <button type="submit" name="submit" class="btn btn-primary btn-block"><i class="fas fa-save"></i> Create Category</button>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
 
-    <button type="submit" name="submit">Create Category</button>
-</form>
+</div> <!-- Close dashboard-container -->
+</body>
+</html>

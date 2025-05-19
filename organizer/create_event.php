@@ -1,115 +1,181 @@
 <?php
     require_once("organizer_auth.php");
     require_once("../php/db.php");
-
-    if (isset($_POST['submit'])) {
-       
-        $title = $_POST['title'];
-        $description = $_POST['description'];
-        $date = $_POST['date'];
-        $venue_id = $_POST['venue_id'];
-        $organizer_id = $_SESSION['user_id']; 
-        $category_id = $_POST['category_id'];
-        $price = $_POST['price'];
-    
-        
-        if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-            $imageTmp = $_FILES['image']['tmp_name'];
-            $imageName = $_FILES['image']['name'];
-            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-            $fileExtension = pathinfo($imageName, PATHINFO_EXTENSION);
-            
-            $imagePath = '../images/events/' . $imageName;
-
-            if (!is_dir('../images/events')) {
-                mkdir('../images/events', 0777, true);
-            }
-
-            if (in_array($fileExtension, $allowedExtensions) && $_FILES['image']['size'] < 5000000) {
-                copy($imageTmp, $imagePath);
-            } else {
-                echo "Invalid file type or file is too large.";
-                exit();
-            }
-        } else {
-            $imagePath = null; 
-        }
-
-        $insertQuery = "INSERT INTO events (organizer_id, title, description, date, venue_id, image, category_id, price)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = mysqli_prepare($conn, $insertQuery);
-        mysqli_stmt_bind_param($stmt, "isssdsid", $organizer_id, $title, $description, $date, $venue_id, $imagePath, $category_id, $price);
-        $result = mysqli_stmt_execute($stmt);
-
-        if($result) {
-            echo "Event Created Successfully!";
-        } else {
-            echo "Error creating event";
-        }
-    }
-
-    
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Event</title>
-</head>
-
-
-
-
-
-<?php
     require_once("organizer_header.php");
 ?>
 
-<h1>Create New Event</h1>
+<div class="create-event-container">
+    <h2 class="section-title">Create New Event</h2>
+    
+    <?php
+    // Display success/error messages if any
+    if (isset($_SESSION['event_success'])) {
+        echo '<div class="alert alert-success">' . $_SESSION['event_success'] . '</div>';
+        unset($_SESSION['event_success']);
+    }
+    
+    if (isset($_SESSION['event_error'])) {
+        echo '<div class="alert alert-danger">' . $_SESSION['event_error'] . '</div>';
+        unset($_SESSION['event_error']);
+    }
+    ?>
 
-    <form action="create_event.php" method="POST" enctype="multipart/form-data">
-        <label for="title">Event Title</label>
-        <input type="text" name="title" required><br>
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-calendar-plus"></i> Event Details</h3>
+        </div>
+        <div class="card-body">
+            <form action="create_event.php" method="POST" enctype="multipart/form-data" class="create-event-form">
+                <div class="form-group">
+                    <label for="title">Event Title</label>
+                    <input type="text" name="title" id="title" class="form-input" placeholder="Enter a descriptive title" required>
+                    <small class="form-text">Choose a clear, descriptive title for your event</small>
+                </div>
 
-        <label for="description">Description</label>
-        <textarea name="description" required></textarea><br>
+                <div class="form-group">
+                    <label for="description">Event Description</label>
+                    <textarea name="description" id="description" rows="5" class="form-textarea" placeholder="Describe your event in detail" required></textarea>
+                    <small class="form-text">Provide details about your event, what attendees can expect, etc.</small>
+                </div>
 
-        <label for="date">Event Date</label>
-        <input type="date" name="date" required><br>
+                <div class="form-row">
+                    <div class="form-group form-group-half">
+                        <label for="date">Event Date</label>
+                        <input type="date" name="date" id="date" class="form-input" required>
+                        <small class="form-text">When will your event take place?</small>
+                    </div>
 
-        <label for="venue">Venue</label>
-        <select name="venue_id" required>
-            
-            <?php
-            $venuesQuery = "SELECT * FROM venues";
-            $result = mysqli_query($conn, $venuesQuery);
-            while ($venue = mysqli_fetch_assoc($result)) {
-                echo "<option value='{$venue['id']}'>{$venue['name']}</option>";
-            }
-            ?>
-        </select><br>
+                    <div class="form-group form-group-half">
+                        <label for="price">Ticket Price ($)</label>
+                        <input type="number" name="price" id="price" step="0.01" min="0" class="form-input" placeholder="0.00" required>
+                        <small class="form-text">How much will tickets cost? (Enter 0 for free events)</small>
+                    </div>
+                </div>
 
-        <label for="image">Event Image</label>
-        <input type="file" name="image"><br>
+                <div class="form-row">
+                    <div class="form-group form-group-half">
+                        <label for="venue_id">Venue</label>
+                        <select name="venue_id" id="venue_id" class="form-select" required>
+                            <option value="">Select a venue</option>
+                            <?php
+                            $venuesQuery = "SELECT * FROM venues ORDER BY name ASC";
+                            $result = mysqli_query($conn, $venuesQuery);
+                            while ($venue = mysqli_fetch_assoc($result)) {
+                                echo "<option value='{$venue['id']}'>{$venue['name']} ({$venue['location']}, capacity: {$venue['capacity']})</option>";
+                            }
+                            ?>
+                        </select>
+                        <small class="form-text">Where will your event be held?</small>
+                    </div>
+                    
+                    <div class="form-group form-group-half">
+                        <label for="category_id">Event Category</label>
+                        <select name="category_id" id="category_id" class="form-select" required>
+                            <option value="">Select a category</option>
+                            <?php
+                            $categoryQuery = "SELECT * from event_categories ORDER BY name ASC";
+                            $result = mysqli_query($conn, $categoryQuery);
+                            while ($category = mysqli_fetch_assoc($result)) {
+                                echo "<option value='{$category['id']}'>{$category['name']}</option>";
+                            }
+                            ?>
+                        </select>
+                        <small class="form-text">What type of event is this?</small>
+                    </div>
+                </div>
 
-        <label for="category">Event Category</label>
-        <select name="category_id" id="category_id" required>
-            <?php
-            $categoryQuery = "SELECT * from event_categories";
-            $result = mysqli_query($conn, $categoryQuery);
-            while ($category = mysqli_fetch_assoc($result)) {
-                echo "<option value='{$category['id']}'>{$category['name']}</option>";
-            }
-            ?>
-        </select>
+                <div class="form-group">
+                    <label for="image">Event Image</label>
+                    <input type="file" name="image" id="image" class="form-input">
+                    <small class="form-text">Upload an image to represent your event (JPG, PNG, GIF, max 5MB)</small>
+                </div>
 
-        <label for="price">Ticket Price ($):</label>
-        <input type="number" name="price" step="0.01" min="0" required> 
+                <div class="form-actions">
+                    <button type="submit" name="submit" class="btn btn-primary"><i class="fas fa-save"></i> Create Event</button>
+                    <a href="events.php" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-        <button type="submit" name="submit">Create Event</button>
-    </form>
+<?php
+// Process form submission
+if (isset($_POST['submit'])) {
+    // Validate and sanitize inputs
+    $title = trim($_POST['title']);
+    $description = trim($_POST['description']);
+    $date = $_POST['date'];
+    $venue_id = (int)$_POST['venue_id'];
+    $organizer_id = $_SESSION['user_id']; 
+    $category_id = (int)$_POST['category_id'];
+    $price = (float)$_POST['price'];
+    
+    // Validate required fields
+    if (empty($title) || empty($description) || empty($date) || empty($venue_id) || empty($category_id)) {
+        $_SESSION['event_error'] = "All fields are required.";
+        header("Location: create_event.php");
+        exit();
+    }
+    
+    // Handle image upload
+    $imagePath = null;
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $imageTmp = $_FILES['image']['tmp_name'];
+        $imageName = $_FILES['image']['name'];
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+        $fileExtension = strtolower(pathinfo($imageName, PATHINFO_EXTENSION));
+        
+        // Create directory if it doesn't exist
+        if (!is_dir('../images/events')) {
+            mkdir('../images/events', 0777, true);
+        }
+        
+        // Generate unique filename to prevent overwriting
+        $uniqueName = time() . '_' . $imageName;
+        $imagePath = '../images/events/' . $uniqueName;
+        $fullPath = $imagePath;
 
-</body>
-</html>
+        // Validate file type and size
+        if (!in_array($fileExtension, $allowedExtensions)) {
+            $_SESSION['event_error'] = "Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.";
+            header("Location: create_event.php");
+            exit();
+        }
+        
+        if ($_FILES['image']['size'] > 5000000) { // 5MB limit
+            $_SESSION['event_error'] = "File is too large. Maximum size is 5MB.";
+            header("Location: create_event.php");
+            exit();
+        }
+        
+        // Move the uploaded file
+        if (!move_uploaded_file($imageTmp, $fullPath)) {
+            $_SESSION['event_error'] = "Failed to upload image. Please try again.";
+            header("Location: create_event.php");
+            exit();
+        }
+    }
+
+    // Insert event into database
+    $insertQuery = "INSERT INTO events (organizer_id, title, description, date, venue_id, image, category_id, price)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $stmt = mysqli_prepare($conn, $insertQuery);
+    mysqli_stmt_bind_param($stmt, "isssisid", $organizer_id, $title, $description, $date, $venue_id, $imagePath, $category_id, $price);
+    $result = mysqli_stmt_execute($stmt);
+
+    if($result) {
+        $_SESSION['event_success'] = "Event created successfully!";
+        header("Location: events.php");
+        exit();
+    } else {
+        $_SESSION['event_error'] = "Error creating event: " . mysqli_error($conn);
+        header("Location: create_event.php");
+        exit();
+    }
+}
+?>
+
+
+
+
