@@ -63,7 +63,9 @@
     $min_price = isset($_GET["min_price"]) && is_numeric($_GET["min_price"]) ? floatval($_GET["min_price"]) : null;
     $max_price = isset($_GET["max_price"]) && is_numeric($_GET["max_price"]) ? floatval($_GET["max_price"]) : null;
 
-
+    $per_page = 5;
+    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+    $offset = ($page - 1) * $per_page;
 
     $filterQuery = "SELECT * from events e where organizer_id = ?";
     $parameters = [$_SESSION["user_id"]];
@@ -155,7 +157,24 @@
             $filterQuery .= " ORDER BY date ASC";
             break;
         }
+    $countQuery = "SELECT COUNT(*) AS total FROM (" . $filterQuery . ") AS total_events";
+    $countTypes = $types;
+    $countParams = $parameters;
 
+    $filterQuery .= " LIMIT ? OFFSET ?";
+    $types .= "ii";
+    $parameters[] = $per_page;
+    $parameters[] = $offset;
+
+    $countStmt = mysqli_prepare($conn, $countQuery);
+    if (!empty($countParams)) {
+        mysqli_stmt_bind_param($countStmt, $countTypes, ...$countParams);
+    }
+    mysqli_stmt_execute($countStmt);
+    $countResult = mysqli_stmt_get_result($countStmt);
+    $total_results = mysqli_fetch_assoc($countResult)['total'];
+    $total_pages = ceil($total_results / $per_page);
+    mysqli_stmt_close($countStmt);
 
     $stmt = mysqli_prepare($conn, $filterQuery);
     mysqli_stmt_bind_param($stmt,$types, ...$parameters);
@@ -240,6 +259,31 @@
         echo "</tr>";
     }
     echo "</table>";
+
+   
+        echo "<div style='margin-top:20px;'>Pages: ";
+    
+        if ($page > 1) {
+            $query['page'] = $page - 1;
+            $prevUrl = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
+            echo "<a href='$prevUrl'>« Prev</a> ";
+        }
+    
+        for ($i = 1; $i <= $total_pages; $i++) {
+            $query['page'] = $i;
+            $url = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
+            $isCurrent = $i == $page ? "style='font-weight:bold;'" : "";
+            echo "<a href='$url' $isCurrent>$i</a> ";
+        }
+    
+        if ($page < $total_pages) {
+            $query['page'] = $page + 1;
+            $nextUrl = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
+            echo "<a href='$nextUrl'>Next »</a>";
+        }
+    
+        echo "</div>";
+    
 
     }
     else echo "No events found";
