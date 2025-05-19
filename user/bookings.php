@@ -37,8 +37,8 @@
     <input type="number" name="min_tickets" placeholder="Min Tickets" value="<?= $_GET["min_tickets"] ?? '' ?>">
     <input type="number" name="max_tickets" placeholder="Max Tickets" value="<?= $_GET["max_tickets"] ?? '' ?>">
 
-    <input type="number" step="0.01" name="min_price" placeholder="Min Price" value="<?= $_GET["min_price"] ?? '' ?>">
-    <input type="number" step="0.01" name="max_price" placeholder="Max Price" value="<?= $_GET["max_price"] ?? '' ?>">
+    <input type="number" step="0.01" name="min_price" placeholder="Min Total Price" value="<?= $_GET["min_price"] ?? '' ?>">
+    <input type="number" step="0.01" name="max_price" placeholder="Max Total Price" value="<?= $_GET["max_price"] ?? '' ?>">
 
     <button type="submit">Filter</button>
 </form>
@@ -123,18 +123,46 @@
     } else {
         $bookingsQuery .= " ORDER BY e.date ASC"; // default
     }
-   
-   $stmt = $conn->prepare($bookingsQuery);
-   if(count($parameters) > 1) {
+
+    // Set pagination values early
+    $per_page = 3;
+    $page = isset($_GET["page"]) && is_numeric($_GET["page"]) ? (int) $_GET["page"] : 1;
+    $offset = ($page - 1) * $per_page;
+
+
+    $countQuery = "SELECT COUNT(*) AS total FROM (" . $bookingsQuery . ") AS total_table";
+    $countTypes = $types;
+    $countParams = $parameters;
+
+    $bookingsQuery .= " LIMIT ? OFFSET ?";
+    $types .= "ii";
+    $parameters[] = $per_page;
+    $parameters[] = $offset;
+
+    $countStmt = $conn->prepare($countQuery);
+    if (count($countParams) > 1) {
+        $countStmt->bind_param($countTypes, ...$countParams);
+    } else {
+        $countStmt->bind_param($countTypes, $countParams[0]);
+    }
+    $countStmt->execute();
+    $countResult = $countStmt->get_result()->fetch_assoc();
+    $total_results = $countResult["total"];
+    $countStmt->close();
+    $total_pages = ceil($total_results / $per_page);
+
+    $stmt = $conn->prepare($bookingsQuery);
+    if (count($parameters) > 1) {
         $stmt->bind_param($types, ...$parameters);
-   } else {
-    $stmt->bind_param($types, $parameters[0]);
-   }
+    } else {
+        $stmt->bind_param($types, $parameters[0]);
+    }
+    $stmt->execute();
+    $allBookings = $stmt->get_result();
+    $stmt->close();
     
-   
-   $stmt->execute();
-   $allBookings = $stmt->get_result();
-   $stmt->close();
+
+
    if($allBookings->num_rows > 0) {
    
     echo "<table>
@@ -190,10 +218,26 @@
         }
 
         echo "</table>";
+        
+    
     }
     else {
         echo "<h2>No bookings found with the selected filters.</h2>";
     }
+
+    if (true) {
+        echo "<div style='margin-top: 20px;'>Pages: ";
+        for ($i = 1; $i <= $total_pages; $i++) {
+            $query = $_GET;
+            $query["page"] = $i;
+            $url = htmlspecialchars($_SERVER["PHP_SELF"] . "?" . http_build_query($query));
+            $isCurrent = $i == $page ? "style='font-weight:bold;'" : "";
+            echo "<a href='$url' $isCurrent>$i</a> ";
+        }
+        echo "</div>";
+    }
+    
+    echo "</div>";
     echo "</body>";
     echo "</html>";
 
