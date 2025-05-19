@@ -33,7 +33,7 @@ $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] 
 $offset = ($page - 1) * $per_page;
 
 //total pages count
-$countQuery = "SELECT COUNT(*) AS total FROM users";
+$countQuery = "SELECT COUNT(*) AS total FROM users WHERE 1=1";
 $countParams = [];
 $countTypes = "";
 
