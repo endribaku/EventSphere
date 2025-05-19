@@ -1,4 +1,5 @@
 <?php
+    ob_start(); 
     require_once("organizer_auth.php");
     require_once("../php/db.php");
     require_once("organizer_header.php");
@@ -8,16 +9,7 @@
     <h2 class="section-title">Create New Event</h2>
     
     <?php
-    // Display success/error messages if any
-    if (isset($_SESSION['event_success'])) {
-        echo '<div class="alert alert-success">' . $_SESSION['event_success'] . '</div>';
-        unset($_SESSION['event_success']);
-    }
     
-    if (isset($_SESSION['event_error'])) {
-        echo '<div class="alert alert-danger">' . $_SESSION['event_error'] . '</div>';
-        unset($_SESSION['event_error']);
-    }
     ?>
 
     <div class="card">
@@ -169,7 +161,7 @@ if (isset($_POST['submit'])) {
         header("Location: events.php");
         exit();
     } else {
-        $_SESSION['event_error'] = "Error creating event: " . mysqli_error($conn);
+        $_SESSION['event_error'] = "Error creating event: " . mysqli_stmt_error($stmt);
         header("Location: create_event.php");
         exit();
     }
