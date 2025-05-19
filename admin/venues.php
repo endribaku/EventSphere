@@ -35,6 +35,51 @@ require_once("admin_header.php");
 <?php
 require_once("../php/db.php");
 
+$per_page = 3;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $per_page;
+
+// Count query for total venues after filters
+$countQuery = "SELECT COUNT(*) AS total FROM venues WHERE 1=1";
+$countParams = [];
+$countTypes = '';
+
+if (!empty($_GET['name'])) {
+    $countQuery .= " AND name LIKE ?";
+    $countParams[] = '%' . $_GET['name'] . '%';
+    $countTypes .= 's';
+}
+if (!empty($_GET['location'])) {
+    $countQuery .= " AND location LIKE ?";
+    $countParams[] = '%' . $_GET['location'] . '%';
+    $countTypes .= 's';
+}
+if (!empty($_GET['country'])) {
+    $countQuery .= " AND country LIKE ?";
+    $countParams[] = '%' . $_GET['country'] . '%';
+    $countTypes .= 's';
+}
+if (!empty($_GET['min_capacity']) && is_numeric($_GET['min_capacity'])) {
+    $countQuery .= " AND capacity >= ?";
+    $countParams[] = intval($_GET['min_capacity']);
+    $countTypes .= 'i';
+}
+if (!empty($_GET['max_capacity']) && is_numeric($_GET['max_capacity'])) {
+    $countQuery .= " AND capacity <= ?";
+    $countParams[] = intval($_GET['max_capacity']);
+    $countTypes .= 'i';
+}
+
+$countStmt = $conn->prepare($countQuery);
+if (!empty($countParams)) {
+    $countStmt->bind_param($countTypes, ...$countParams);
+}
+$countStmt->execute();
+$total_results = $countStmt->get_result()->fetch_assoc()['total'];
+$countStmt->close();
+
+$total_pages = ceil($total_results / $per_page);
+
 $venueQuery = "SELECT * FROM venues WHERE 1=1";
 $parameters = [];
 $types = '';
@@ -84,6 +129,11 @@ if (!empty($_GET['sort'])) {
     $venueQuery .= " ORDER BY name ASC"; // Default sort
 }
 
+$venueQuery .= " LIMIT ? OFFSET ?";
+$parameters[] = $per_page;
+$parameters[] = $offset;
+$types .= 'ii';
+
 // Prepare and bind
 $venueStmt = $conn->prepare($venueQuery);
 if (!empty($parameters)) {
@@ -118,6 +168,17 @@ while($venueRow = $venue->fetch_assoc()) {
 }
 
 echo "</table>";
+
+    echo "<div style='margin-top: 20px;'>Pages: ";
+    for ($i = 1; $i <= $total_pages; $i++) {
+        $query = $_GET;
+        $query['page'] = $i;
+        $url = htmlspecialchars($_SERVER["PHP_SELF"] . '?' . http_build_query($query));
+        $highlight = ($i == $page) ? "style='font-weight:bold;'" : '';
+        echo "<a href='$url' $highlight>$i</a> ";
+    }
+    echo "</div>";
+
 echo "</div>";
 echo "</body>";
 echo "</html>";
