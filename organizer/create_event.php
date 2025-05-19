@@ -109,6 +109,18 @@ if (isset($_POST['submit'])) {
         header("Location: create_event.php");
         exit();
     }
+
+    $conflictQuery = "SELECT id FROM events WHERE venue_id = ? AND date = ?";
+    $conflictStmt = mysqli_prepare($conn, $conflictQuery);
+    mysqli_stmt_bind_param($conflictStmt, "is", $venue_id, $date);
+    mysqli_stmt_execute($conflictStmt);
+    $conflictResult = mysqli_stmt_get_result($conflictStmt);
+
+    if (mysqli_num_rows($conflictResult) > 0) {
+        $_SESSION['event_error'] = "There is already an event scheduled at this venue on that date. Please choose another date or venue.";
+        header("Location: create_event.php");
+        exit();
+    }
     
     // Handle image upload
     $imagePath = null;

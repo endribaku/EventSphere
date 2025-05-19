@@ -17,6 +17,18 @@ if(isset($_POST["submit"])) {
     $categoryid = $_POST["category"];
     $price = $_POST["price"];
 
+    $conflictQuery = "SELECT id FROM events WHERE venue_id = ? AND date = ? AND id != ?";
+    $conflictStmt = mysqli_prepare($conn, $conflictQuery);
+    mysqli_stmt_bind_param($conflictStmt, "isi", $venueid, $date, $event_id);
+    mysqli_stmt_execute($conflictStmt);
+    $conflictResult = mysqli_stmt_get_result($conflictStmt);
+
+    if (mysqli_num_rows($conflictResult) > 0) {
+        $_SESSION['event_error'] = "❌ Conflict: There's already another event scheduled at this venue on the same date.";
+        header("Location: ../admin/update_event.php?id=" . $event_id);
+        exit();
+    }
+
     $imagePath = null;
     $imageUpdateClause = "";
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {

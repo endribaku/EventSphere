@@ -10,6 +10,8 @@ if (!isset($_GET['id']) || !filter_var($_GET['id'], FILTER_VALIDATE_INT)) {
 }
 
 
+
+
 $event_id = $_GET['id'];
 $organizer_id = $_SESSION['user_id'];
 
@@ -24,6 +26,18 @@ if(isset($_POST["submit"])) {
     //this check shouldnt be, i need to add validation on update_event for this 
     if(empty($title) || empty($description) || empty($date) || empty($venueid)) {
         die("Please fill all required fields.");
+    }
+
+    $conflictQuery = "SELECT id FROM events WHERE venue_id = ? AND date = ? AND id != ?";
+    $conflictStmt = mysqli_prepare($conn, $conflictQuery);
+    mysqli_stmt_bind_param($conflictStmt, "isi", $venueid, $date, $event_id);
+    mysqli_stmt_execute($conflictStmt);
+    $conflictResult = mysqli_stmt_get_result($conflictStmt);
+
+    if (mysqli_num_rows($conflictResult) > 0) {
+        $_SESSION['event_error'] = "❌ Conflict: There's already another event scheduled at this venue on the same date.";
+        header("Location: ../organizer/update_event.php?id=" . $event_id);
+        exit();
     }
 
     $imagePath = null;
