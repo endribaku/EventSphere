@@ -79,13 +79,6 @@
         $types .= "s";
     }
 
-    if ($sort === "ascending") {
-        $bookingsQuery .= " ORDER BY e.date ASC";
-    } elseif ($sort === "descending") {
-        $bookingsQuery .= " ORDER BY e.date DESC";
-    } else {
-        $bookingsQuery .= " ORDER BY e.date ASC"; // default
-    }
 
     if (!empty($_GET["date_from"])) {
         $bookingsQuery .= " AND e.date >= ?";
@@ -110,19 +103,26 @@
         $parameters[] = $_GET["max_tickets"];
         $types .= "i";
     }
-    // ticket price
+    // total ticket price
     if (!empty($_GET["min_price"]) && is_numeric($_GET["min_price"])) {
-        $bookingsQuery .= " AND e.price >= ?";
+        $bookingsQuery .= " AND (e.price * b.tickets) >= ?";
         $parameters[] = $_GET["min_price"];
         $types .= "d";
     }
-
+    
     if (!empty($_GET["max_price"]) && is_numeric($_GET["max_price"])) {
-        $bookingsQuery .= " AND e.price <= ?";
+        $bookingsQuery .= " AND (e.price * b.tickets) <= ?";
         $parameters[] = $_GET["max_price"];
         $types .= "d";
     }
    
+    if ($sort === "ascending") {
+        $bookingsQuery .= " ORDER BY e.date ASC";
+    } elseif ($sort === "descending") {
+        $bookingsQuery .= " ORDER BY e.date DESC";
+    } else {
+        $bookingsQuery .= " ORDER BY e.date ASC"; // default
+    }
    
    $stmt = $conn->prepare($bookingsQuery);
    if(count($parameters) > 1) {
