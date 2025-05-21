@@ -119,6 +119,7 @@ if (isset($_SESSION["user_id"], $_SESSION["user_role"])) {
         </div>
     </footer>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         // Mobile menu toggle
         document.querySelector('.menu-toggle').addEventListener('click', function() {
@@ -179,52 +180,57 @@ if (isset($_SESSION["user_id"], $_SESSION["user_role"])) {
             return emailRegex.test(email);
         }
 
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        $('#loginForm').on('submit', function (e) {
+    e.preventDefault();
 
-            if (!validateLoginForm()) return;
+    if (!validateLoginForm()) return;
 
-            const email = document.querySelector('.emailLoginField').value;
-            const password = document.querySelector('.passwordLoginField').value;
+    const email = $('.emailLoginField').val().trim();
+    const password = $('.passwordLoginField').val();
 
-            const submitButton = this.querySelector('button[type="submit"]');
-            const originalText = submitButton.textContent;
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+    const submitButton = $(this).find('button[type="submit"]');
+    const originalText = submitButton.text();
 
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'php/login.php', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    submitButton.prop('disabled', true);
+    submitButton.html('<i class="fas fa-spinner fa-spin"></i> Logging in...');
 
-            xhr.onload = function() {
-                submitButton.disabled = false;
-                submitButton.textContent = originalText;
+    $.ajax({
+        url: 'php/login.php',
+        type: 'POST',
+        data: {
+            emailPHP: email,
+            passwordPHP: password
+        },
+        success: function (response) {
+            submitButton.prop('disabled', false);
+            submitButton.html(originalText);
 
-                const response = this.responseText;
-                if (response.includes('user') || response.includes('admin') || response.includes('organizer')) {
-                    showNotification('Login successful! Redirecting...', false);
-                    setTimeout(() => {
-                        if (response.includes('user')) {
-                            window.location.href = 'user/dashboard.php';
-                        } else if (response.includes('admin')) {
-                            window.location.href = 'admin/dashboard.php';
-                        } else if (response.includes('organizer')) {
-                            window.location.href = 'organizer/dashboard.php';
-                        }
-                    }, 1000);
-                } else {
-                    showNotification(response || 'Invalid email or password', true);
-                }
-            };
+            console.log('Login response:', response); // For debugging
 
-            xhr.onerror = function() {
-                submitButton.disabled = false;
-                submitButton.textContent = originalText;
-                showNotification('Connection error. Please check your internet connection.', true);
-            };
-
-            xhr.send('emailPHP=' + encodeURIComponent(email) + '&passwordPHP=' + encodeURIComponent(password));
+            if (response.includes('user') || response.includes('admin') || response.includes('organizer')) {
+                showNotification('Login successful! Redirecting...', false);
+                setTimeout(() => {
+                    if (response.includes('user')) {
+                        window.location.href = 'user/dashboard.php';
+                    } else if (response.includes('admin')) {
+                        window.location.href = 'admin/dashboard.php';
+                    } else if (response.includes('organizer')) {
+                        window.location.href = 'organizer/dashboard.php';
+                    }
+                }, 1000);
+            } else {
+                showNotification(response || 'Invalid email or password', true);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Login AJAX error:", status, error); // Optional
+            submitButton.prop('disabled', false);
+            submitButton.html(originalText);
+            showNotification('Connection error. Please check your internet connection.', true);
+        }
         });
+    });
+
     </script>
     <script src="js/main.js"></script>
 </body>

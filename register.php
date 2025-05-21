@@ -44,8 +44,8 @@ if (isset($_SESSION["user_id"], $_SESSION["user_role"])) {
                     <li><a href="index.php#features">Features</a></li>
                     <li><a href="index.php#events">Events</a></li>
                     <li><a href="index.php#about">About</a></li>
-                    <li><a href="login.html" class="btn btn-outline">Login</a></li>
-                    <li><a href="register.html" class="btn btn-primary">Sign Up</a></li>
+                    <li><a href="login.php" class="btn btn-outline">Login</a></li>
+                    <li><a href="register.php" class="btn btn-primary">Sign Up</a></li>
                 </ul>
             </nav>
             <div class="menu-toggle">
@@ -81,7 +81,7 @@ if (isset($_SESSION["user_id"], $_SESSION["user_role"])) {
                 <button type="submit" class="btn-submit">Create Account</button>
             </form>
             <div class="auth-links">
-                <p>Already have an account? <a href="login.html">Login</a></p>
+                <p>Already have an account? <a href="login.php">Login</a></p>
             </div>
         </div>
     </div>
@@ -105,8 +105,8 @@ if (isset($_SESSION["user_id"], $_SESSION["user_role"])) {
                         <li><a href="index.php#features">Features</a></li>
                         <li><a href="index.php#events">Events</a></li>
                         <li><a href="index.php#about">About</a></li>
-                        <li><a href="login.html">Login</a></li>
-                        <li><a href="register.html">Sign Up</a></li>
+                        <li><a href="login.php">Login</a></li>
+                        <li><a href="register.php">Sign Up</a></li>
                     </ul>
                 </div>
                 <div class="footer-links">

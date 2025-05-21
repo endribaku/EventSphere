@@ -3,7 +3,14 @@ require_once("admin_auth.php");
 require_once("admin_header.php");
 require_once("../php/db.php");
 ?>
-
+<?php 
+if(isset($_SESSION["count_error"])) {
+    if(isset($_SESSION["count_error"])) {
+        echo '<div class="alert alert-danger">'.$_SESSION["count_error"].'</div>';
+        unset($_SESSION["count_error"]);
+    }
+}
+?>
 <h2 class="section-title">Manage Venues</h2>
 
 <div class="filter-form">

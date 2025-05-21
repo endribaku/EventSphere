@@ -2,7 +2,10 @@
 require_once("admin_auth.php");
 require_once("admin_header.php");
 require_once("../php/db.php");
+
 ?>
+
+
 
 <h2 class="section-title">Manage Events</h2>
 

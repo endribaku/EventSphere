@@ -6,7 +6,7 @@ if(!isset($_POST["submit"])) {
     exit();
 }
 
-if (empty($name)) {
+if (empty($_POST["name"])) {
     die("Category name cannot be empty.");
 }
 

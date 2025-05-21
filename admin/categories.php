@@ -3,6 +3,8 @@ require_once("admin_auth.php");
 require_once("admin_header.php");
 require_once("../php/db.php");
 require_once("../categories/read.php");
+
+
 ?>
 
 <h2 class="section-title">Manage Event Categories</h2>
@@ -20,6 +22,11 @@ if (isset($_GET['status'])) {
         echo '<div class="alert alert-danger">An error occurred. Please try again.</div>';
     }
 }
+if(isset($_SESSION["count_error"])) {
+  echo '<div class="alert alert-danger">'.$_SESSION["count_error"].'</div>';
+  unset($_SESSION["count_error"]);
+}
+
 ?>
 
 <div class="row">

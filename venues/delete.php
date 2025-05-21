@@ -8,6 +8,22 @@ if(!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
 }
 
 $venue_id = $_GET["id"];
+
+//count events
+$countVenuesQuery = "SELECT COUNT(*) as count FROM events where venue_id = ?";
+$stmt = $conn->prepare($countVenuesQuery);
+$stmt->bind_param("i", $venue_id);
+$stmt->execute();
+$eventCount = $stmt->get_result();
+$count = $eventCount->fetch_assoc()["count"];
+
+if($count > 0) {
+    $_SESSION["count_error"] = "This venue cannot be deleted because it still has events assigned to it. Please delete or reassign those events first.";
+    header("Location: ../admin/venues.php");
+    exit();
+}
+
+
 $venueDeleteQuery = "DELETE FROM venues WHERE id = ?";
 $venueStmt = $conn->prepare($venueDeleteQuery);
 $venueStmt->bind_param("i", $venue_id);
