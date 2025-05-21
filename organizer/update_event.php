@@ -17,6 +17,11 @@ if(isset($_SESSION['event_error'])) {
     echo '<div class="alert alert-danger">'.$_SESSION['event_error'].'</div>';
     unset($_SESSION['event_error']);
 }
+if(isset($_SESSION["image_error"])) {
+    echo '<div class="alert alert-danger">'.$_SESSION["image_error"].'</div>';
+    unset($_SESSION["image_Error"]);
+}
+
 
 $event_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if(!$event_id) {

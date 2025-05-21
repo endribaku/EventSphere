@@ -12,7 +12,12 @@ if(!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
 
 if(isset($_SESSION["event_error"])) {
     echo '<div class="alert alert-danger">'.$_SESSION["event_error"].'</div>';
-    unset($_SESSION["event_Error"]);
+    unset($_SESSION["event_error"]);
+}
+
+if(isset($_SESSION["image_error"])) {
+    echo '<div class="alert alert-danger">'.$_SESSION["image_error"].'</div>';
+    unset($_SESSION["image_error"]);
 }
 
 $event_id = $_GET["id"];

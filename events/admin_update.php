@@ -40,7 +40,9 @@ if(isset($_POST["submit"])) {
         $fileExtension = strtolower(pathinfo($imageName, PATHINFO_EXTENSION));
 
         if (!in_array($fileExtension, $allowedExtensions) || $_FILES['image']['size'] > 5000000) {
-            die("Invalid file type or file is too large.");
+            $_SESSION["image_error"] = "Invalid file type or file is too large";
+            header("Location: ../admin/update_event.php?id=". $event_id);
+            exit();
         }
 
         $oldImageQuery = "SELECT image FROM events WHERE id = ?";
