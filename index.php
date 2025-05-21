@@ -21,8 +21,8 @@
                     <li><a href="#features">Features</a></li>
                     <li><a href="#events">Events</a></li>
                     <li><a href="#about">About</a></li>
-                    <li><a href="login.html" class="btn btn-outline">Login</a></li>
-                    <li><a href="register.html" class="btn btn-primary">Register</a></li>
+                    <li><a href="login.php" class="btn btn-outline">Login</a></li>
+                    <li><a href="register.php" class="btn btn-primary">Register</a></li>
                 </ul>
             </nav>
             <div class="menu-toggle">
@@ -37,7 +37,7 @@
                 <h1>Discover & Book Amazing Events</h1>
                 <p>Find the perfect events for you - concerts, sports, theater, and more. Or create and manage your own events with our powerful platform.</p>
                 <div class="hero-buttons">
-                    <a href="register.html" class="btn btn-primary btn-large">Get Started</a>
+                    <a href="register.php" class="btn btn-primary btn-large">Get Started</a>
                     <a href="#events" class="btn btn-secondary btn-large">Explore Events</a>
                 </div>
             </div>
@@ -101,7 +101,7 @@
                         <p class="event-description">Experience the thrill of the greatest spectacle in racing.</p>
                         <div class="event-footer">
                             <span class="event-price">$85.00</span>
-                            <a href="login.html" class="btn btn-sm btn-primary">Book Now</a>
+                            <a href="login.php" class="btn btn-sm btn-primary">Book Now</a>
                         </div>
                     </div>
                 </div>
@@ -119,7 +119,7 @@
                         <p class="event-description">Witness the ultimate fighting championship live.</p>
                         <div class="event-footer">
                             <span class="event-price">$120.00</span>
-                            <a href="login.html" class="btn btn-sm btn-primary">Book Now</a>
+                            <a href="login.php" class="btn btn-sm btn-primary">Book Now</a>
                         </div>
                     </div>
                 </div>
@@ -137,13 +137,13 @@
                         <p class="event-description">Watch the ultimate showdown in European football.</p>
                         <div class="event-footer">
                             <span class="event-price">$95.00</span>
-                            <a href="login.html" class="btn btn-sm btn-primary">Book Now</a>
+                            <a href="login.php" class="btn btn-sm btn-primary">Book Now</a>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="view-all-container">
-                <a href="login.html" class="btn btn-secondary">View All Events</a>
+                <a href="login.php" class="btn btn-secondary">View All Events</a>
             </div>
         </div>
     </section>
@@ -154,7 +154,7 @@
                 <h2 class="section-title">About Evently</h2>
                 <p>Evently is your one-stop platform for discovering, booking, and managing events. Whether you're looking to attend the hottest concerts, sporting events, or conferences, or you're an organizer wanting to create and manage your own events, Evently has you covered.</p>
                 <p>Our mission is to connect people through memorable experiences and make event management seamless for organizers.</p>
-                <a href="register.html" class="btn btn-primary">Join Evently Today</a>
+                <a href="register.php" class="btn btn-primary">Join Evently Today</a>
             </div>
             <div class="about-image">
                 <img src="images/events/Screenshot%202025-05-10%20at%204.34.52%20PM.png" alt="Event crowd">
@@ -175,8 +175,8 @@
                         <li><a href="#features">Features</a></li>
                         <li><a href="#events">Events</a></li>
                         <li><a href="#about">About</a></li>
-                        <li><a href="login.html">Login</a></li>
-                        <li><a href="register.html">Register</a></li>
+                        <li><a href="login.php">Login</a></li>
+                        <li><a href="register.php">Register</a></li>
                     </ul>
                 </div>
                 <div class="footer-contact">

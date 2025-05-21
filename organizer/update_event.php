@@ -17,6 +17,7 @@ if(isset($_SESSION['event_error'])) {
     echo '<div class="alert alert-danger">'.$_SESSION['event_error'].'</div>';
     unset($_SESSION['event_error']);
 }
+
 $event_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if(!$event_id) {
     die("Invalid event ID.");

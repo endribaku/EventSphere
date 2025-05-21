@@ -10,6 +10,11 @@ if(!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
     exit();
 }
 
+if(isset($_SESSION["event_error"])) {
+    echo '<div class="alert alert-danger">'.$_SESSION["event_error"].'</div>';
+    unset($_SESSION["event_Error"]);
+}
+
 $event_id = $_GET["id"];
 $event = getEventById($conn, $event_id);
 

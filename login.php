@@ -1,3 +1,25 @@
+<?php
+session_start();
+
+// Redirect logged-in users based on role
+if (isset($_SESSION["user_id"], $_SESSION["user_role"])) {
+    switch ($_SESSION["user_role"]) {
+        case "admin":
+            header("Location: admin/dashboard.php");
+            exit();
+        case "organizer":
+            header("Location: organizer/dashboard.php");
+            exit();
+        case "user":
+            header("Location: user/dashboard.php");
+            exit();
+        default:
+            header("Location: index.php");
+            exit();
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,8 +43,8 @@
                     <li><a href="index.php#features">Features</a></li>
                     <li><a href="index.php#events">Events</a></li>
                     <li><a href="index.php#about">About</a></li>
-                    <li><a href="login.html" class="btn btn-outline">Login</a></li>
-                    <li><a href="register.html" class="btn btn-primary">Sign Up</a></li>
+                    <li><a href="login.php" class="btn btn-outline">Login</a></li>
+                    <li><a href="register.php" class="btn btn-primary">Sign Up</a></li>
                 </ul>
             </nav>
             <div class="menu-toggle">
@@ -46,7 +68,7 @@
                 <button type="submit" class="btn-submit">Login</button>
             </form>
             <div class="auth-links">
-                <p>Don't have an account? <a href="register.html">Sign Up</a></p>
+                <p>Don't have an account? <a href="register.php">Sign Up</a></p>
             </div>
         </div>
     </div>
@@ -70,8 +92,8 @@
                         <li><a href="index.php#features">Features</a></li>
                         <li><a href="index.php#events">Events</a></li>
                         <li><a href="index.php#about">About</a></li>
-                        <li><a href="login.html">Login</a></li>
-                        <li><a href="register.html">Sign Up</a></li>
+                        <li><a href="login.php">Login</a></li>
+                        <li><a href="register.php">Sign Up</a></li>
                     </ul>
                 </div>
                 <div class="footer-links">
@@ -102,16 +124,11 @@
         document.querySelector('.menu-toggle').addEventListener('click', function() {
             document.querySelector('.main-nav').classList.toggle('active');
         });
-        
-        // Create a notification function
+
         function showNotification(message, isError = false) {
-            // Remove any existing notification
             const existingNotification = document.querySelector('.notification');
-            if (existingNotification) {
-                existingNotification.remove();
-            }
-            
-            // Create notification element
+            if (existingNotification) existingNotification.remove();
+
             const notification = document.createElement('div');
             notification.className = `notification ${isError ? 'notification-error' : 'notification-success'}`;
             notification.innerHTML = `
@@ -121,114 +138,94 @@
                 </div>
                 <button class="notification-close">&times;</button>
             `;
-            
-            // Add to DOM
+
             document.body.appendChild(notification);
-            
-            // Add close button functionality
-            notification.querySelector('.notification-close').addEventListener('click', function() {
+
+            notification.querySelector('.notification-close').addEventListener('click', function () {
                 notification.remove();
             });
-            
-            // Auto remove after 5 seconds
+
             setTimeout(() => {
                 if (document.body.contains(notification)) {
                     notification.remove();
                 }
             }, 5000);
         }
-        
-        // Form validation
+
         function validateLoginForm() {
             const email = document.querySelector('.emailLoginField').value.trim();
             const password = document.querySelector('.passwordLoginField').value;
-            
+
             if (!email) {
                 showNotification('Please enter your email address', true);
                 return false;
             }
-            
+
             if (!isValidEmail(email)) {
                 showNotification('Please enter a valid email address', true);
                 return false;
             }
-            
+
             if (!password) {
                 showNotification('Please enter your password', true);
                 return false;
             }
-            
+
             return true;
         }
-        
+
         function isValidEmail(email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
         }
-        
-        // AJAX login form submission
+
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            if (!validateLoginForm()) {
-                return;
-            }
-            
+
+            if (!validateLoginForm()) return;
+
             const email = document.querySelector('.emailLoginField').value;
             const password = document.querySelector('.passwordLoginField').value;
-            
-            // Show loading state
+
             const submitButton = this.querySelector('button[type="submit"]');
             const originalText = submitButton.textContent;
             submitButton.disabled = true;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-            
+
             const xhr = new XMLHttpRequest();
             xhr.open('POST', 'php/login.php', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            
+
             xhr.onload = function() {
-                // Reset button
                 submitButton.disabled = false;
                 submitButton.textContent = originalText;
-                
-                if (this.status === 200) {
-                    const response = this.responseText;
-                    if (response.includes('user') || response.includes('admin') || response.includes('organizer')) {
-                        // Successful login - redirect based on role
-                        showNotification('Login successful! Redirecting...', false);
-                        setTimeout(() => {
-                            if (response.includes('user')) {
-                                window.location.href = 'user/dashboard.php';
-                            } else if (response.includes('admin')) {
-                                window.location.href = 'admin/dashboard.php';
-                            } else if (response.includes('organizer')) {
-                                window.location.href = 'organizer/dashboard.php';
-                            }
-                        }, 1000);
-                    } else {
-                        // Failed login
-                        showNotification(response || 'Invalid email or password', true);
-                    }
+
+                const response = this.responseText;
+                if (response.includes('user') || response.includes('admin') || response.includes('organizer')) {
+                    showNotification('Login successful! Redirecting...', false);
+                    setTimeout(() => {
+                        if (response.includes('user')) {
+                            window.location.href = 'user/dashboard.php';
+                        } else if (response.includes('admin')) {
+                            window.location.href = 'admin/dashboard.php';
+                        } else if (response.includes('organizer')) {
+                            window.location.href = 'organizer/dashboard.php';
+                        }
+                    }, 1000);
                 } else {
-                    showNotification('Server error. Please try again later.', true);
+                    showNotification(response || 'Invalid email or password', true);
                 }
             };
-            
+
             xhr.onerror = function() {
                 submitButton.disabled = false;
                 submitButton.textContent = originalText;
                 showNotification('Connection error. Please check your internet connection.', true);
             };
-            
+
             xhr.send('emailPHP=' + encodeURIComponent(email) + '&passwordPHP=' + encodeURIComponent(password));
         });
     </script>
-    <!-- Place the script at the end of the body for better performance -->
     <script src="js/main.js"></script>
 </body>
 </html>
-
-
-
-
