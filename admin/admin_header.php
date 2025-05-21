@@ -45,7 +45,7 @@ session_start();
             <?php
                 echo "<p>".$_SESSION["user_name"]."</p>";
             ?>
-            <a href="../php/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <a href="../php/logout.php?token=<?php echo $_SESSION['user_token']; ?>"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </div>
 
