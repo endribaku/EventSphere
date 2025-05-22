@@ -157,7 +157,7 @@
                 <a href="register.php" class="btn btn-primary">Join Evently Today</a>
             </div>
             <div class="about-image">
-                <img src="images/events/Screenshot%202025-05-10%20at%204.34.52%20PM.png" alt="Event crowd">
+                <img src="images/excited-audience-watching-confetti-fireworks-having-fun-music-festival-night-copy-space.jpg" alt="Event crowd">
             </div>
         </div>
     </section>
