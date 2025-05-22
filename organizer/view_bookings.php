@@ -6,13 +6,13 @@
 
 <div class="bookings-container">
     <?php
-    if(!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
+    if(!isset($_GET["event_id"]) || !is_numeric($_GET["event_id"])) {
         echo '<div class="alert alert-danger">Invalid event ID.</div>';
         echo '<a href="events.php" class="btn btn-primary">Back to Events</a>';
         exit();
     }
 
-    $event_id = $_GET["id"];
+    $event_id = $_GET["event_id"];
     
     // First get event details
     $eventQuery = "SELECT e.title, e.date, e.price, v.name AS venue_name 
