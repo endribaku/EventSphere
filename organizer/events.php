@@ -276,7 +276,7 @@ if($eventResults->num_rows > 0) {
         // Actions
         echo '<td class="actions">';
         echo '<a href="event_details.php?id=' . $event['id'] . '" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>';
-        echo '<a href="view_bookings.php?id=' . $event['id'] . '" class="btn btn-sm btn-secondary"><i class="fas fa-ticket-alt"></i></a>';
+        echo '<a href="view_bookings.php?event_id=' . $event['id'] . '" class="btn btn-sm btn-secondary"><i class="fas fa-ticket-alt"></i></a>';
         echo '<a href="update_event.php?id=' . $event['id'] . '" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>';
         echo '<a href="../events/delete.php?id=' . $event['id'] . '" class="btn btn-sm btn-danger" onclick="return confirm(\'Are you sure you want to delete this event?\')"><i class="fas fa-trash"></i></a>';
         echo '</td>';

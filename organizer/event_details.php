@@ -191,7 +191,7 @@
                             echo '</li>';
                         }
                         echo '</ul>';
-                        echo '<a href="view_bookings.php?event_id=' . $event_id . '" class="btn btn-sm btn-secondary btn-block">View All Bookings</a>';
+                        echo '<a href="view_bookings.php?id=' . $event_id . '" class="btn btn-sm btn-secondary btn-block">View All Bookings</a>';
                     } else {
                         echo '<p class="no-data">No bookings for this event yet.</p>';
                     }
