@@ -84,7 +84,35 @@ $event = $event->fetch_assoc();
                             echo "<option value='{$venue['id']}' {$selected}>{$venue['name']} ({$venue['location']})</option>";
                         }
                         ?>
+                        <option value="new">+ Create New Venue</option>
                     </select>
+                </div>
+                
+                <div id="new-venue-fields" style="display:none; margin-top: 1em;">
+                    <div class="form-group">
+                        <label for="new_venue_name">New Venue Name</label>
+                        <input type="text" name="new_venue_name" id="new_venue_name" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select id="country" name="country" class="form-select">
+                            <option value="">Select a country</option>
+                            <?php 
+                            require_once("../misc/countries.list.php");
+                            foreach($countries as $country) {
+                                echo '<option value="' . htmlspecialchars($country) . '">' . htmlspecialchars($country) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_venue_location">Location</label>
+                        <input type="text" name="new_venue_location" id="new_venue_location" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="new_venue_capacity">Capacity</label>
+                        <input type="number" name="new_venue_capacity" id="new_venue_capacity" class="form-input" min="1">
+                    </div>
                 </div>
                 
                 <div class="form-group form-group-half">
@@ -154,3 +182,24 @@ $event = $event->fetch_assoc();
     </footer>
 
 </html>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const venueSelect = document.getElementById('venue');
+    const newVenueFields = document.getElementById('new-venue-fields');
+    const newVenueInputs = newVenueFields.querySelectorAll('input, select');
+
+    function toggleNewVenueFields() {
+        if (venueSelect.value === 'new') {
+            newVenueFields.style.display = 'block';
+            newVenueInputs.forEach(input => input.setAttribute('required', 'required'));
+        } else {
+            newVenueFields.style.display = 'none';
+            newVenueInputs.forEach(input => input.removeAttribute('required'));
+        }
+    }
+
+    venueSelect.addEventListener('change', toggleNewVenueFields);
+    toggleNewVenueFields(); // Call once on page load in case of prefill
+});
+</script>

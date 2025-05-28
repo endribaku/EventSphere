@@ -67,6 +67,18 @@
                         <input type="text" name="new_venue_name" id="new_venue_name" class="form-input">
                     </div>
                     <div class="form-group">
+                        <label for="country">Country</label>
+                        <select id="country" name="country" class="form-select" required>
+                            <option value="">Select a country</option>
+                            <?php 
+                            require_once("../misc/countries.list.php");
+                            foreach($countries as $country) {
+                                echo '<option value="' . htmlspecialchars($country) . '">' . htmlspecialchars($country) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="new_venue_location">Location</label>
                         <input type="text" name="new_venue_location" id="new_venue_location" class="form-input">
                     </div>
@@ -120,30 +132,27 @@ if (isset($_POST['submit'])) {
     // if create venue
 
     if ($_POST['venue_id'] === 'new') {
-        // Get new venue details
         $newVenueName = trim($_POST['new_venue_name']);
         $newVenueLocation = trim($_POST['new_venue_location']);
         $newVenueCapacity = (int)$_POST['new_venue_capacity'];
+        $newVenueCountry = trim($_POST['country']);
     
-        // Validate new venue fields
-        if (empty($newVenueName) || empty($newVenueLocation) || $newVenueCapacity <= 0) {
-            $_SESSION['event_error'] = "Please provide all details for the new venue.";
+        if (empty($newVenueName) || empty($newVenueLocation) || empty($newVenueCountry) || $newVenueCapacity <= 0) {
+            $_SESSION['event_error'] = "Please provide all details for the new venue including country.";
             header("Location: create_event.php");
             exit();
         }
     
-        // Insert new venue
-        $insertVenueQuery = "INSERT INTO venues (name, location, capacity) VALUES (?, ?, ?)";
+        $insertVenueQuery = "INSERT INTO venues (name, location, country, capacity) VALUES (?, ?, ?, ?)";
         $venueStmt = mysqli_prepare($conn, $insertVenueQuery);
-        mysqli_stmt_bind_param($venueStmt, "ssi", $newVenueName, $newVenueLocation, $newVenueCapacity);
-        
+        mysqli_stmt_bind_param($venueStmt, "sssi", $newVenueName, $newVenueLocation, $newVenueCountry, $newVenueCapacity);
+    
         if (!mysqli_stmt_execute($venueStmt)) {
             $_SESSION['event_error'] = "Failed to create new venue.";
             header("Location: create_event.php");
             exit();
         }
     
-        // Get the ID of the newly created venue
         $venue_id = mysqli_insert_id($conn);
     } else {
         $venue_id = (int)$_POST['venue_id'];

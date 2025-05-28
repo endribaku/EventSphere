@@ -248,7 +248,6 @@ if($eventResults->num_rows > 0) {
         if (!empty($event['image'])) {
             echo '<img src="' . htmlspecialchars($event['image']) . '" alt="' . htmlspecialchars($event['title']) . '" class="event-thumbnail">';
         } else {
-            echo '<img src="../images/placeholder.svg" class ="event-thumbnail">';
             echo '<div class="no-image"><i class="fas fa-image"></i></div>';
         }
         echo '</td>';

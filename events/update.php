@@ -29,20 +29,32 @@ if(isset($_POST["submit"])) {
     }
 
     if ($_POST["venue"] === "new") {
-        $name = trim($_POST["new_venue_name"]);
-        $location = trim($_POST["new_venue_location"]);
-        $capacity = (int)$_POST["new_venue_capacity"];
-    
-        if (empty($name) || empty($location) || $capacity <= 0) {
-            die("Please complete all new venue fields.");
+        $newVenueName = trim($_POST['new_venue_name']);
+        $newVenueLocation = trim($_POST['new_venue_location']);
+        $newVenueCapacity = (int)$_POST['new_venue_capacity'];
+        $newVenueCountry = trim($_POST['country']);
+
+        if (empty($newVenueName) || empty($newVenueLocation) || empty($newVenueCountry) || $newVenueCapacity <= 0) {
+            $_SESSION['event_error'] = "Please provide all details for the new venue including country.";
+            header("Location: ../organizer/update_event.php?id=" . $event_id);
+            exit();
         }
-    
-        $venueInsert = "INSERT INTO venues (name, location, capacity) VALUES (?, ?, ?)";
-        $stmt = mysqli_prepare($conn, $venueInsert);
-        mysqli_stmt_bind_param($stmt, "ssi", $name, $location, $capacity);
-        mysqli_stmt_execute($stmt);
-        $venueid = mysqli_insert_id($conn); // Update venue ID for the event
+
+        $insertVenueQuery = "INSERT INTO venues (name, location, country, capacity) VALUES (?, ?, ?, ?)";
+        $venueStmt = mysqli_prepare($conn, $insertVenueQuery);
+        mysqli_stmt_bind_param($venueStmt, "sssi", $newVenueName, $newVenueLocation, $newVenueCountry, $newVenueCapacity);
+
+        if (!mysqli_stmt_execute($venueStmt)) {
+            $_SESSION['event_error'] = "Failed to create new venue.";
+            header("Location: ../organizer/update_event.php?id=" . $event_id);
+            exit();
+        }
+
+        $venueid = mysqli_insert_id($conn);
+    } else {
+        $venueid = (int)$_POST["venue"];
     }
+
     
 
     $conflictQuery = "SELECT id FROM events WHERE venue_id = ? AND date = ? AND id != ?";

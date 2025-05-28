@@ -94,10 +94,22 @@ $eventTime = $event["date"];
                     <div class="form-group">
                         <label for="new_venue_name">New Venue Name</label>
                         <input type="text" name="new_venue_name" id="new_venue_name" class="form-input">
-                    </div>
+                    </div> 
                     <div class="form-group">
                         <label for="new_venue_location">Location</label>
                         <input type="text" name="new_venue_location" id="new_venue_location" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select id="country" name="country" class="form-select">
+                            <option value="">Select a country</option>
+                            <?php 
+                            require_once("../misc/countries.list.php");
+                            foreach($countries as $country) {
+                                echo '<option value="' . htmlspecialchars($country) . '">' . htmlspecialchars($country) . '</option>';
+                            }
+                            ?>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="new_venue_capacity">Capacity</label>
