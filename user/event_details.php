@@ -42,7 +42,7 @@
             <?php if (!empty($event['image'])): ?>
                 <img src="<?php echo htmlspecialchars($event['image']); ?>" alt="<?php echo htmlspecialchars($event['title']); ?>">
             <?php else: ?>
-                <img src="/placeholder.svg?height=400&width=600" alt="Event placeholder">
+                <img src="../images/placeholder.svg?height=400&width=600" alt="Event placeholder">
             <?php endif; ?>
         </div>
         

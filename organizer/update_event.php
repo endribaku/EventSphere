@@ -62,22 +62,22 @@ $eventTime = $event["date"];
         
         <div class="form-group">
             <label for="title">Event Title</label>
-            <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($event['title']); ?>" required>
+            <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($event['title']); ?>" class="form-input" required>
         </div>
 
         <div class="form-group">
             <label for="description">Description</label>
-            <textarea name="description" id="description" rows="5" required><?php echo htmlspecialchars($event['description']); ?></textarea>
+            <textarea name="description" id="description" rows="5" required class="form-input"><?php echo htmlspecialchars($event['description']); ?></textarea>
         </div>
 
         <div class="form-group">
             <label for="date">Event Date</label>
-            <input type="date" name="date" id="date" value="<?php echo $event['date']; ?>" required>
+            <input type="date" name="date" id="date" value="<?php echo $event['date']; ?>" class="form-input" class="form-input" required>
         </div>
 
         <div class="form-group">
             <label for="venue">Venue</label>
-            <select name="venue" id="venue" required>
+            <select name="venue" id="venue" class="form-input" required>
                 <?php
                 $venuesQuery = "SELECT * FROM venues";
                 $venuesResult = mysqli_query($conn, $venuesQuery);
@@ -90,7 +90,7 @@ $eventTime = $event["date"];
             </select>
         </div>
 
-        <div id="new-venue-fields" style="display:none; margin-top: 1em;">
+        <div id="new-venue-fields" style="display:none; margin-top: 1em;" >
                     <div class="form-group">
                         <label for="new_venue_name">New Venue Name</label>
                         <input type="text" name="new_venue_name" id="new_venue_name" class="form-input">
@@ -113,7 +113,7 @@ $eventTime = $event["date"];
 
         <div class="form-group">
             <label for="category">Event Category</label>
-            <select name="category" id="category" required>
+            <select name="category" id="category" required class="form-input">
                 <?php
                 $categoryQuery = "SELECT * FROM event_categories";
                 $categoryResult = mysqli_query($conn, $categoryQuery);
@@ -127,11 +127,11 @@ $eventTime = $event["date"];
 
         <div class="form-group">
             <label for="price">Ticket Price ($)</label>
-            <input type="number" name="price" id="price" step="0.01" min="0" value="<?php echo htmlspecialchars($event['price']); ?>" required>
+            <input type="number" name="price" id="price" step="0.01" min="0" value="<?php echo htmlspecialchars($event['price']); ?>" class="form-input" required>
         </div>
 
         <div class="form-actions">
-            <button type="submit" name="submit" class="btn btn-primary">Update Event</button>
+            <button type="submit" name="submit" class="btn btn-primary" >Update Event</button>
             <a href="events.php" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
@@ -170,22 +170,18 @@ $eventTime = $event["date"];
                 <p><?= htmlspecialchars($site['footer_text']) ?></p>
             </div>
         </div>
-    </footer>
-
+</footer>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const venueSelect = document.getElementById('venue');
     const newVenueFields = document.getElementById('new-venue-fields');
-
     if (venueSelect && newVenueFields) {
         venueSelect.addEventListener('change', function () {
-            if (this.value === 'new') {
-                newVenueFields.style.display = 'block';
-            } else {
-                newVenueFields.style.display = 'none';
-            }
+            newVenueFields.style.display = this.value === 'new' ? 'block' : 'none';
         });
     }
 });
 </script>
+</body>
+</html>
