@@ -19,7 +19,7 @@ if(isset($_SESSION['event_error'])) {
 }
 if(isset($_SESSION["image_error"])) {
     echo '<div class="alert alert-danger">'.$_SESSION["image_error"].'</div>';
-    unset($_SESSION["image_Error"]);
+    unset($_SESSION["image_error"]);
 }
 
 
@@ -86,8 +86,24 @@ $eventTime = $event["date"];
                     echo "<option value='{$venue['id']}' {$selected}>{$venue['name']}</option>";
                 }
                 ?>
+                 <option value="new">+ Create New Venue</option>
             </select>
         </div>
+
+        <div id="new-venue-fields" style="display:none; margin-top: 1em;">
+                    <div class="form-group">
+                        <label for="new_venue_name">New Venue Name</label>
+                        <input type="text" name="new_venue_name" id="new_venue_name" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="new_venue_location">Location</label>
+                        <input type="text" name="new_venue_location" id="new_venue_location" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="new_venue_capacity">Capacity</label>
+                        <input type="number" name="new_venue_capacity" id="new_venue_capacity" class="form-input" min="1">
+                    </div>
+         </div>
 
         <div class="form-group">
             <label for="image">Event Image (Leave blank to keep current image)</label>
@@ -120,3 +136,20 @@ $eventTime = $event["date"];
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const venueSelect = document.getElementById('venue');
+    const newVenueFields = document.getElementById('new-venue-fields');
+
+    if (venueSelect && newVenueFields) {
+        venueSelect.addEventListener('change', function () {
+            if (this.value === 'new') {
+                newVenueFields.style.display = 'block';
+            } else {
+                newVenueFields.style.display = 'none';
+            }
+        });
+    }
+});
+</script>

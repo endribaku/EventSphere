@@ -56,8 +56,24 @@
                                 echo "<option value='{$venue['id']}'>{$venue['name']} ({$venue['location']}, capacity: {$venue['capacity']})</option>";
                             }
                             ?>
+                            <option value="new">+ Create New Venue</option>
                         </select>
                         <small class="form-text">Where will your event be held?</small>
+                    </div>
+                
+                    <div id="new-venue-fields" style="display:none; margin-top: 1em;">
+                    <div class="form-group">
+                        <label for="new_venue_name">New Venue Name</label>
+                        <input type="text" name="new_venue_name" id="new_venue_name" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="new_venue_location">Location</label>
+                        <input type="text" name="new_venue_location" id="new_venue_location" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="new_venue_capacity">Capacity</label>
+                        <input type="number" name="new_venue_capacity" id="new_venue_capacity" class="form-input" min="1">
+                    </div>
                     </div>
                     
                     <div class="form-group form-group-half">
@@ -98,11 +114,41 @@ if (isset($_POST['submit'])) {
     $title = trim($_POST['title']);
     $description = trim($_POST['description']);
     $date = $_POST['date'];
-    $venue_id = (int)$_POST['venue_id'];
     $organizer_id = $_SESSION['user_id']; 
     $category_id = (int)$_POST['category_id'];
     $price = (float)$_POST['price'];
+    // if create venue
+
+    if ($_POST['venue_id'] === 'new') {
+        // Get new venue details
+        $newVenueName = trim($_POST['new_venue_name']);
+        $newVenueLocation = trim($_POST['new_venue_location']);
+        $newVenueCapacity = (int)$_POST['new_venue_capacity'];
     
+        // Validate new venue fields
+        if (empty($newVenueName) || empty($newVenueLocation) || $newVenueCapacity <= 0) {
+            $_SESSION['event_error'] = "Please provide all details for the new venue.";
+            header("Location: create_event.php");
+            exit();
+        }
+    
+        // Insert new venue
+        $insertVenueQuery = "INSERT INTO venues (name, location, capacity) VALUES (?, ?, ?)";
+        $venueStmt = mysqli_prepare($conn, $insertVenueQuery);
+        mysqli_stmt_bind_param($venueStmt, "ssi", $newVenueName, $newVenueLocation, $newVenueCapacity);
+        
+        if (!mysqli_stmt_execute($venueStmt)) {
+            $_SESSION['event_error'] = "Failed to create new venue.";
+            header("Location: create_event.php");
+            exit();
+        }
+    
+        // Get the ID of the newly created venue
+        $venue_id = mysqli_insert_id($conn);
+    } else {
+        $venue_id = (int)$_POST['venue_id'];
+    }
+
     // Validate required fields
     if (empty($title) || empty($description) || empty($date) || empty($venue_id) || empty($category_id)) {
         $_SESSION['event_error'] = "All fields are required.";
@@ -179,7 +225,22 @@ if (isset($_POST['submit'])) {
     }
 }
 ?>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const venueSelect = document.getElementById('venue_id');
+    const newVenueFields = document.getElementById('new-venue-fields');
 
+    if (venueSelect && newVenueFields) {
+        venueSelect.addEventListener('change', function () {
+            if (this.value === 'new') {
+                newVenueFields.style.display = 'block';
+            } else {
+                newVenueFields.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
 
 
 

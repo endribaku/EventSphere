@@ -28,6 +28,23 @@ if(isset($_POST["submit"])) {
         die("Please fill all required fields.");
     }
 
+    if ($_POST["venue"] === "new") {
+        $name = trim($_POST["new_venue_name"]);
+        $location = trim($_POST["new_venue_location"]);
+        $capacity = (int)$_POST["new_venue_capacity"];
+    
+        if (empty($name) || empty($location) || $capacity <= 0) {
+            die("Please complete all new venue fields.");
+        }
+    
+        $venueInsert = "INSERT INTO venues (name, location, capacity) VALUES (?, ?, ?)";
+        $stmt = mysqli_prepare($conn, $venueInsert);
+        mysqli_stmt_bind_param($stmt, "ssi", $name, $location, $capacity);
+        mysqli_stmt_execute($stmt);
+        $venueid = mysqli_insert_id($conn); // Update venue ID for the event
+    }
+    
+
     $conflictQuery = "SELECT id FROM events WHERE venue_id = ? AND date = ? AND id != ?";
     $conflictStmt = mysqli_prepare($conn, $conflictQuery);
     mysqli_stmt_bind_param($conflictStmt, "isi", $venueid, $date, $event_id);
