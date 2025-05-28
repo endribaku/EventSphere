@@ -33,7 +33,7 @@
                 <div class="form-row">
                     <div class="form-group form-group-half">
                         <label for="date">Event Date</label>
-                        <input type="date" name="date" id="date" class="form-input" required>
+                        <input type="date" name="date" id="date" class="form-input" required min="<?= date('Y-m-d') ?>">
                         <small class="form-text">When will your event take place?</small>
                     </div>
 
