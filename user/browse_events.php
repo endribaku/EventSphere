@@ -178,11 +178,14 @@
             
             // Event image with date badge
             echo '<div class="event-image">';
-            if (!empty($event['image'])) {
-                echo '<img src="' . htmlspecialchars($event['image']) . '" alt="' . htmlspecialchars($event['title']) . '">';
-            } else {
-                echo '<img src="/placeholder.svg?height=200&width=300" alt="Event placeholder">';
-            }
+        
+          
+            $imagePath = $event["image"];
+                if ($imagePath && file_exists($imagePath)) {
+                    echo '<img src="' . htmlspecialchars($imagePath) . '" alt="' . htmlspecialchars($event['title']) . '">';
+                } else {
+                    echo '<img src="../images/placeholder.svg" alt="Event placeholder">';
+                }
             
             echo '<div class="event-date">
                     <span class="day">' . $day . '</span>

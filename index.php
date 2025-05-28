@@ -1,3 +1,8 @@
+<?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,64 +88,61 @@
         </div>
     </section>
 
+    <?php
+    require_once('php/db.php'); // your database connection
+    $sql = "
+        SELECT 
+            e.id, 
+            e.title, 
+            e.description, 
+            e.date, 
+            e.price, 
+            e.image, 
+            v.name AS venue_name, 
+            c.name AS category_name
+        FROM events e
+        JOIN venues v ON e.venue_id = v.id
+        JOIN event_categories c ON e.category_id = c.id
+        ORDER BY e.date ASC
+        LIMIT 3
+    ";
+
+    
+    $result = mysqli_query($conn, $sql);
+    if (!$result) {
+        die("SQL Error: " . mysqli_error($conn));
+    }
+    ?>
     <section id="events" class="featured-events">
         <div class="container">
             <h2 class="section-title">Featured Events</h2>
             <div class="events-grid">
+            <?php 
+                while ($event = mysqli_fetch_assoc($result)):
+                    $dt = new DateTime($event['date']);
+                    $day = $dt->format('d');
+                    $month = $dt->format('M');
+                ?>
                 <div class="event-card">
                     <div class="event-image">
-                        <img src="images/events/indy%20500.jpg" alt="Indy 500">
+                    <img src="<?= htmlspecialchars(str_replace('../', '', $event['image'])) ?>" alt="<?= htmlspecialchars($event['title']) ?>">
                         <div class="event-date">
-                            <span class="day">26</span>
-                            <span class="month">May</span>
+                            <span class="day"><?= $day ?></span>
+                            <span class="month"><?= $month ?></span>
                         </div>
                     </div>
                     <div class="event-details">
-                        <h3>Indy 500</h3>
-                        <p class="event-location"><i class="fas fa-map-marker-alt"></i> Indianapolis Motor Speedway</p>
-                        <p class="event-description">Experience the thrill of the greatest spectacle in racing.</p>
+                        <h3><?= htmlspecialchars($event['title']) ?></h3>
+                        <p class="event-category"><strong>Category:</strong> <?= htmlspecialchars($event['category_name']) ?></p>
+                        <p class="event-location"><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($event['venue_name']) ?></p>
+                        <p class="event-description"><?= htmlspecialchars($event['description']) ?></p>
                         <div class="event-footer">
-                            <span class="event-price">$85.00</span>
+                            <span class="event-price">$<?= number_format($event['price'], 2) ?></span>
                             <a href="login.php" class="btn btn-sm btn-primary">Book Now</a>
                         </div>
                     </div>
                 </div>
-                <div class="event-card">
-                    <div class="event-image">
-                        <img src="images/events/UFC_309_poster.jpg" alt="UFC 309">
-                        <div class="event-date">
-                            <span class="day">15</span>
-                            <span class="month">Jun</span>
-                        </div>
-                    </div>
-                    <div class="event-details">
-                        <h3>UFC 309</h3>
-                        <p class="event-location"><i class="fas fa-map-marker-alt"></i> Madison Square Garden, NY</p>
-                        <p class="event-description">Witness the ultimate fighting championship live.</p>
-                        <div class="event-footer">
-                            <span class="event-price">$120.00</span>
-                            <a href="login.php" class="btn btn-sm btn-primary">Book Now</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="event-card">
-                    <div class="event-image">
-                        <img src="images/events/2019731_73c1d651_man-united-vs-tottenham-europa-league-final-live-screening_400.jpg" alt="Europa League Final">
-                        <div class="event-date">
-                            <span class="day">29</span>
-                            <span class="month">May</span>
-                        </div>
-                    </div>
-                    <div class="event-details">
-                        <h3>Europa League Final</h3>
-                        <p class="event-location"><i class="fas fa-map-marker-alt"></i> Aviva Stadium, Dublin</p>
-                        <p class="event-description">Watch the ultimate showdown in European football.</p>
-                        <div class="event-footer">
-                            <span class="event-price">$95.00</span>
-                            <a href="login.php" class="btn btn-sm btn-primary">Book Now</a>
-                        </div>
-                    </div>
-                </div>
+                <?php endwhile; ?>
             </div>
             <div class="view-all-container">
                 <a href="login.php" class="btn btn-secondary">View All Events</a>

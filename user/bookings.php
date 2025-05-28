@@ -191,7 +191,7 @@
             if (!empty($booking['image'])) {
                 echo '<img src="' . htmlspecialchars($booking['image']) . '" alt="' . htmlspecialchars($booking['title']) . '">';
             } else {
-                echo '<img src="/placeholder.svg?height=200&width=300" alt="Event placeholder">';
+                echo '<img src="../images/placeholder.svg?height=200&width=300" alt="Event placeholder">';
             }
             echo '<div class="booking-status ' . $statusClass . '">' . $status . '</div>';
             echo '</div>';
