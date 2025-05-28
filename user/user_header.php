@@ -1,15 +1,16 @@
 <?php
-
-
 session_start();
+require_once('../php/db.php');
 
+$siteResult = mysqli_query($conn, "SELECT * FROM site_info LIMIT 1");
+$site = mysqli_fetch_assoc($siteResult);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evently - User Dashboard</title>
+    <title><?= htmlspecialchars($site['company_name']) ?> - User Dashboard</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,13 +21,14 @@ session_start();
     <header class="main-header">
         <div class="container">
             <div class="logo">
-                <h1><a href="dashboard.php">Evently</a></h1>
+                <h1><a href="dashboard.php"><?= htmlspecialchars($site['company_name']) ?></a></h1>
             </div>
             <div class="menu-toggle">
                 <i class="fas fa-bars"></i>
             </div>
         </div>
     </header>
+
 
     <div class="navigation_information">
         <div class="nav_bar">
@@ -58,6 +60,7 @@ session_start();
                 <?php echo $_SESSION['success']; $_SESSION['success'] = ''; ?>
             </div>
         <?php endif; ?>
+
 
     <script>
         // Mobile menu toggle

@@ -1,15 +1,17 @@
 <?php
-// Start the session if not already started
-
 session_start();
+require_once('../php/db.php');
 
+// Fetch site-wide settings like company name, email, phone
+$siteResult = mysqli_query($conn, "SELECT * FROM site_info LIMIT 1");
+$site = mysqli_fetch_assoc($siteResult);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evently - Organizer Dashboard</title>
+    <title><?= htmlspecialchars($site['company_name']) ?> - Organizer Dashboard</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,7 +22,7 @@ session_start();
     <header class="main-header">
         <div class="container">
             <div class="logo">
-                <h1><a href="dashboard.php">Evently Organizer</a></h1>
+                <h1><a href="dashboard.php"><?= htmlspecialchars($site['company_name']) ?> Organizer</a></h1>
             </div>
             <div class="menu-toggle">
                 <i class="fas fa-bars"></i>
@@ -39,34 +41,24 @@ session_start();
 
         <div class="organizer_info">
             <i class="fas fa-user-tie"></i>
-            <?php
-                echo "<p>".$_SESSION["user_name"]."</p>";
-            ?>
-            <a href="../php/logout.php?token=<?php echo $_SESSION['user_token']; ?>"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <p><?= htmlspecialchars($_SESSION["user_name"]) ?></p>
+            <a href="../php/logout.php?token=<?= urlencode($_SESSION['user_token']) ?>"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </div>
 
     <div class="container dashboard-container">
-        <?php if(isset($_SESSION['error']) && !empty($_SESSION['error'])): ?>
+        <?php if (!empty($_SESSION['error'])): ?>
             <div class="alert alert-danger">
-                <?php echo $_SESSION['error']; $_SESSION['error'] = ''; ?>
-            </div>
-        <?php endif; ?>
-        
-        <?php if(isset($_SESSION['success']) && !empty($_SESSION['success'])): ?>
-            <div class="alert alert-success">
-                <?php echo $_SESSION['success']; $_SESSION['success'] = ''; ?>
+                <?= $_SESSION['error']; $_SESSION['error'] = ''; ?>
             </div>
         <?php endif; ?>
 
-    <script>
-        // Mobile menu toggle
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('.nav_bar').classList.toggle('active');
-        });
-    </script>
-    <!-- Place the script at the end of the body for better performance -->
-    <script src="../js/main.js"></script>
+        <?php if (!empty($_SESSION['success'])): ?>
+            <div class="alert alert-success">
+                <?= $_SESSION['success']; $_SESSION['success'] = ''; ?>
+            </div>
+        <?php endif; ?>
+
 
 
 

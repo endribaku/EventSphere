@@ -2,13 +2,19 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+require_once('php/db.php'); // your database connection
+
+// Fetch site info from database
+$siteResult = mysqli_query($conn, "SELECT * FROM site_info LIMIT 1");
+$site = mysqli_fetch_assoc($siteResult);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evently - Book Amazing Events</title>
+    <title><?= htmlspecialchars($site['company_name']) ?> - Book Amazing Events</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +25,7 @@ error_reporting(E_ALL);
     <header class="main-header">
         <div class="container">
             <div class="logo">
-                <h1>Evently</h1>
+                <h1><?= htmlspecialchars($site['company_name']) ?></h1>
             </div>
             <nav class="main-nav">
                 <ul>
@@ -54,7 +60,7 @@ error_reporting(E_ALL);
 
     <section id="features" class="features">
         <div class="container">
-            <h2 class="section-title">Why Choose Evently?</h2>
+            <h2 class="section-title">Why Choose <?= htmlspecialchars($site['company_name']) ?>?</h2>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
@@ -82,14 +88,13 @@ error_reporting(E_ALL);
                         <i class="fas fa-mobile-alt"></i>
                     </div>
                     <h3>Mobile Friendly</h3>
-                    <p>Access Evently from any device - desktop, tablet, or mobile phone.</p>
+                    <p>Access <?= htmlspecialchars($site['company_name']) ?> from any device - desktop, tablet, or mobile phone.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <?php
-    require_once('php/db.php'); // your database connection
     $sql = "
         SELECT 
             e.id, 
@@ -106,8 +111,6 @@ error_reporting(E_ALL);
         ORDER BY e.date ASC
         LIMIT 3
     ";
-
-    
     $result = mysqli_query($conn, $sql);
     if (!$result) {
         die("SQL Error: " . mysqli_error($conn));
@@ -125,7 +128,7 @@ error_reporting(E_ALL);
                 ?>
                 <div class="event-card">
                     <div class="event-image">
-                    <img src="<?= htmlspecialchars(str_replace('../', '', $event['image'])) ?>" alt="<?= htmlspecialchars($event['title']) ?>">
+                        <img src="<?= htmlspecialchars(str_replace('../', '', $event['image'])) ?>" alt="<?= htmlspecialchars($event['title']) ?>">
                         <div class="event-date">
                             <span class="day"><?= $day ?></span>
                             <span class="month"><?= $month ?></span>
@@ -153,10 +156,10 @@ error_reporting(E_ALL);
     <section id="about" class="about">
         <div class="container">
             <div class="about-content">
-                <h2 class="section-title">About Evently</h2>
-                <p>Evently is your one-stop platform for discovering, booking, and managing events. Whether you're looking to attend the hottest concerts, sporting events, or conferences, or you're an organizer wanting to create and manage your own events, Evently has you covered.</p>
+                <h2 class="section-title">About <?= htmlspecialchars($site['company_name']) ?></h2>
+                <p><?= htmlspecialchars($site['company_name']) ?> is your one-stop platform for discovering, booking, and managing events. Whether you're looking to attend the hottest concerts, sporting events, or conferences, or you're an organizer wanting to create and manage your own events, <?= htmlspecialchars($site['company_name']) ?> has you covered.</p>
                 <p>Our mission is to connect people through memorable experiences and make event management seamless for organizers.</p>
-                <a href="register.php" class="btn btn-primary">Join Evently Today</a>
+                <a href="register.php" class="btn btn-primary">Join <?= htmlspecialchars($site['company_name']) ?> Today</a>
             </div>
             <div class="about-image">
                 <img src="images/excited-audience-watching-confetti-fireworks-having-fun-music-festival-night-copy-space.jpg" alt="Event crowd">
@@ -168,8 +171,8 @@ error_reporting(E_ALL);
         <div class="container">
             <div class="footer-content">
                 <div class="footer-logo">
-                    <h2>Evently</h2>
-                    <p>Discover & Book Amazing Events</p>
+                    <h2><?= htmlspecialchars($site['company_name']) ?></h2>
+                    <p><?= htmlspecialchars($site['footer_text']) ?></p>
                 </div>
                 <div class="footer-links">
                     <h3>Quick Links</h3>
@@ -183,18 +186,18 @@ error_reporting(E_ALL);
                 </div>
                 <div class="footer-contact">
                     <h3>Contact Us</h3>
-                    <p><i class="fas fa-envelope"></i> info@evently.com</p>
-                    <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+                    <p><i class="fas fa-envelope"></i> <?= htmlspecialchars($site['email']) ?></p>
+                    <p><i class="fas fa-phone"></i> <?= htmlspecialchars($site['phone']) ?></p>
                     <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="<?= htmlspecialchars($site['facebook_link']) ?>"><i class="fab fa-facebook-f"></i></a>
+                        <a href="<?= htmlspecialchars($site['twitter_link']) ?>"><i class="fab fa-twitter"></i></a>
+                        <a href="<?= htmlspecialchars($site['instagram_link']) ?>"><i class="fab fa-instagram"></i></a>
+                        <a href="<?= htmlspecialchars($site['linkedin_link']) ?>"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Evently. All rights reserved.</p>
+                <p><?= htmlspecialchars($site['footer_text']) ?></p>
             </div>
         </div>
     </footer>
@@ -207,4 +210,5 @@ error_reporting(E_ALL);
     </script>
 </body>
 </html>
+
 
