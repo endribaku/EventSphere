@@ -345,5 +345,4 @@ if($eventResults->num_rows > 0) {
             </div>
         </div>
     </footer>
-
 </html>

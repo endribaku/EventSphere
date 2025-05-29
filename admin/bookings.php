@@ -147,8 +147,8 @@ $total_pages = ceil($total_results / $per_page);
 
 //filter sql logic
 $bookingsQuery = "SELECT u.name, u.email, e.title AS title, e.description, e.date AS event_date, 
-   v.location AS venue_location, v.name AS venue_name, b.booking_date, e.price, e.image, 
-   b.tickets, b.id AS booking_id, e.id AS event_id
+   v.location AS venue_location, v.name AS venue_name, b.booking_date, e.image, 
+   b.tickets, b.total_price, b.id AS booking_id, e.id AS event_id
    FROM bookings b
    JOIN events e ON b.event_id = e.id 
    JOIN venues v ON e.venue_id = v.id 
@@ -249,7 +249,7 @@ if($bookingResult->num_rows > 0) {
         $bookingDate = new DateTime($booking['booking_date']);
         $formattedBookingDate = $bookingDate->format('M d, Y H:i');
         
-        $totalPrice = $booking["price"] * $booking["tickets"];
+        $totalPrice = $booking["total_price"];
         
         // Determine status
         $status = "";

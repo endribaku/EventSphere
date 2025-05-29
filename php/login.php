@@ -5,6 +5,7 @@ session_destroy();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['emailPHP']);
     $password = $_POST['passwordPHP'];
+    $remember = isset($_POST['remember']);
 
 
     $loginQuery = "SELECT id, name, email, password, role FROM users WHERE email = ?";
@@ -26,6 +27,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_password'] = $user['password'];
             $_SESSION['error'] = "";
             $_SESSION['success'] = "";
+            if (!empty($_POST["remember"])) {
+                $remember_token = bin2hex(random_bytes(32));
+            
+                // Save token in DB
+                $updateQuery = "UPDATE users SET remember_token = ? WHERE id = ?";
+                $updateStmt = mysqli_prepare($conn, $updateQuery);
+                mysqli_stmt_bind_param($updateStmt, "si", $remember_token, $user['id']);
+                mysqli_stmt_execute($updateStmt);
+                mysqli_stmt_close($updateStmt);
+            
+                // Set cookie (30 days)
+                setcookie("remember_token", $remember_token, time() + (86400 * 30), "/");
+            }
             echo $_SESSION['user_role'];
             
         } else {

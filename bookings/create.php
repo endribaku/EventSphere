@@ -23,6 +23,8 @@
     
 
     if($event->num_rows > 0) {
+        $event = $event->fetch_assoc();
+        $eventPrice = $event["price"];
         // finding number of bookings for event
         $nrOfBookingsforEventQuery = "SELECT COALESCE(SUM(tickets), 0) AS numberbookings FROM bookings WHERE event_id=?";
         $stmt = $conn->prepare($nrOfBookingsforEventQuery);
@@ -47,9 +49,11 @@
             header("Location: ../user/event_details.php?id=" . $event_id);
             exit();
         } else {
-            $insertBookingQuery = "INSERT INTO bookings (user_id, event_id, tickets, booking_date) VALUES (?, ?, ?, ?)";
+            $totalPrice = $eventPrice * $nrTickets;
+            
+            $insertBookingQuery = "INSERT INTO bookings (user_id, event_id, tickets, total_price, booking_date) VALUES (?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($insertBookingQuery);
-            $stmt->bind_param("iiis", $_SESSION["user_id"], $event_id, $nrTickets, date("Y-m-d H:i:s"));
+            $stmt->bind_param("iiids", $_SESSION["user_id"], $event_id, $nrTickets, $totalPrice, date("Y-m-d H:i:s"));
             if($stmt->execute()) {
                 
                 $_SESSION["success"] = "Booking made successfully";

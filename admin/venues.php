@@ -10,6 +10,8 @@ if(isset($_SESSION["count_error"])) {
         unset($_SESSION["count_error"]);
     }
 }
+
+
 ?>
 <h2 class="section-title">Manage Venues</h2>
 

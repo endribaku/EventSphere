@@ -47,7 +47,7 @@
    // filter sql logic
    $bookingsQuery = "SELECT e.title AS title, e.description, e.date AS event_date,
     v.location AS venue_location, v.name AS venue_name,
-    b.booking_date, e.price, e.image, b.tickets, b.id AS booking_id, e.id AS event_id
+    b.booking_date, b.total_price, e.image, b.tickets, b.id AS booking_id, e.id AS event_id
     FROM bookings b
     JOIN events e ON b.event_id = e.id
     JOIN venues v ON e.venue_id = v.id
@@ -100,13 +100,13 @@
     }
     // total ticket price
     if (!empty($_GET["min_price"]) && is_numeric($_GET["min_price"])) {
-        $bookingsQuery .= " AND (e.price * b.tickets) >= ?";
+        $bookingsQuery .= " AND (b.total_price) >= ?";
         $parameters[] = $_GET["min_price"];
         $types .= "d";
     }
     
     if (!empty($_GET["max_price"]) && is_numeric($_GET["max_price"])) {
-        $bookingsQuery .= " AND (e.price * b.tickets) <= ?";
+        $bookingsQuery .= " AND (b.total_price) <= ?";
         $parameters[] = $_GET["max_price"];
         $types .= "d";
     }
@@ -168,7 +168,7 @@
             $bookingDate = new DateTime($booking["booking_date"]);
             $formattedBookingDate = $bookingDate->format('M d, Y H:i');
             
-            $totalPrice = $booking["price"] * $booking["tickets"];
+            $totalPrice = $booking["total_price"];
             
             // Determine status
             $status = "";

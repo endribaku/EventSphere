@@ -114,7 +114,7 @@ if(isset($_POST["submit"])) {
     $result = mysqli_stmt_execute($stmt);
 
     if($result) {
-        header("Location: ../organizer/events.php");
+        header("Location: ../organizer/events.php?status=updated");
     } else {
         die("Failed to update event.");
     }

@@ -68,7 +68,7 @@
                     </div>
                     <div class="form-group">
                         <label for="country">Country</label>
-                        <select id="country" name="country" class="form-select" required>
+                        <select id="country" name="country" class="form-select">
                             <option value="">Select a country</option>
                             <?php 
                             require_once("../misc/countries.list.php");

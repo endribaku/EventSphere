@@ -29,10 +29,12 @@ $venueStmt = $conn->prepare($venueDeleteQuery);
 $venueStmt->bind_param("i", $venue_id);
 
 if($venueStmt ->execute()) {
-    header("Location: ../admin/venues.php");
+    
+    header("Location: ../admin/venues.php?status=deleted");
     exit();
 } else {
-    die("Could not delete successfully");
+    header("Location: ../admin/venues.php?status=notdeleted");
+    exit();
 }
 
 

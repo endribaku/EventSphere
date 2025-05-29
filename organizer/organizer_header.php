@@ -58,7 +58,7 @@ $site = mysqli_fetch_assoc($siteResult);
                 <?= $_SESSION['success']; $_SESSION['success'] = ''; ?>
             </div>
         <?php endif; ?>
-
+<script src="../js/main.js"></script>
 
 
 

@@ -17,32 +17,7 @@ if(isset($_POST["submit"])) {
     $categoryid = $_POST["category"];
     $price = $_POST["price"];
 
-    if ($_POST["venue"] === "new") {
-        $newVenueName = trim($_POST['new_venue_name']);
-        $newVenueLocation = trim($_POST['new_venue_location']);
-        $newVenueCountry = trim($_POST['country']);
-        $newVenueCapacity = (int)$_POST['new_venue_capacity'];
-
-        if (empty($newVenueName) || empty($newVenueLocation) || empty($newVenueCountry) || $newVenueCapacity <= 0) {
-            $_SESSION['event_error'] = "Please provide all required fields for the new venue.";
-            header("Location: ../admin/update_event.php?id=" . $event_id);
-            exit();
-        }
-
-        $insertVenueQuery = "INSERT INTO venues (name, location, country, capacity) VALUES (?, ?, ?, ?)";
-        $venueStmt = mysqli_prepare($conn, $insertVenueQuery);
-        mysqli_stmt_bind_param($venueStmt, "sssi", $newVenueName, $newVenueLocation, $newVenueCountry, $newVenueCapacity);
-
-        if (!mysqli_stmt_execute($venueStmt)) {
-            $_SESSION['event_error'] = "❌ Failed to create new venue.";
-            header("Location: ../admin/update_event.php?id=" . $event_id);
-            exit();
-        }
-
-        $venueid = mysqli_insert_id($conn);
-    } else {
-        $venueid = (int)$_POST["venue"];
-    }
+    
 
     $conflictQuery = "SELECT id FROM events WHERE venue_id = ? AND date = ? AND id != ?";
     $conflictStmt = mysqli_prepare($conn, $conflictQuery);
@@ -101,7 +76,7 @@ if(isset($_POST["submit"])) {
     $result = mysqli_stmt_execute($stmt);
 
     if($result) {
-        header("Location: ../admin/events.php");
+        header("Location: ../admin/events.php?status=updated");
     } else {
         die("Failed to update event.");
     }

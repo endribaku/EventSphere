@@ -30,7 +30,7 @@
         }
 
         if ($stmt->execute()) {
-            header("Location: ../admin/users.php");
+            header("Location: ../admin/users.php?update_success=1");
             exit();
     } else {
         die("Failed to update user.");

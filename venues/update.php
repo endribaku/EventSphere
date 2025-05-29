@@ -19,7 +19,7 @@ if(isset($_POST["submit"])) {
     $updateVenueStmt->bind_param("sssii", $venue_name, $venue_location, $venue_country, $venue_capacity, $venue_id);
     
     if($updateVenueStmt->execute() ) {
-        header("Location: ../admin/venues.php");
+        header("Location: ../admin/venues.php?status=updated");
         exit();
     } else {
         die("Update couldn't be made");
@@ -31,8 +31,3 @@ if(isset($_POST["submit"])) {
 
 
 ?>
-
-
-
-
-

@@ -54,13 +54,13 @@
     <div class="stat-card">
         <?php
             // Calculate total revenue
-            $stmt = $conn->prepare("SELECT SUM(e.price * b.tickets) as revenue FROM bookings b 
+            $stmt = $conn->prepare("SELECT SUM(b.total_price) as revenue FROM bookings b 
                                    JOIN events e ON b.event_id = e.id 
                                    WHERE e.organizer_id = ?");
             $stmt->bind_param("i", $_SESSION['user_id']);
             $stmt->execute();
             $result = $stmt->get_result();
-            $revenue = $result->fetch_assoc()['revenue'] ?: 0;
+            $revenue = $result->fetch_assoc()['revenue'] ?? 0;
         ?>
         <h3>Total Revenue</h3>
         <div class="stat-value">$<?= number_format($revenue, 2) ?></div>
@@ -100,7 +100,7 @@
                         <td>' . $event['bookings_count'] . '</td>
                         <td>
                             <a href="event_details.php?id=' . $event['id'] . '" class="btn btn-sm btn-primary">Details</a>
-                            <a href="view_bookings.php?id=' . $event['id'] . '" class="btn btn-sm btn-secondary">Bookings</a>
+                            <a href="view_bookings.php?event_id=' . $event['id'] . '" class="btn btn-sm btn-secondary">Bookings</a>
                         </td>
                       </tr>';
             }

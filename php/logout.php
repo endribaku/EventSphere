@@ -1,5 +1,11 @@
+
+
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
+require_once("db.php");
 
 // neqoftese user ben logout kur shtyp butonin logout
 if (
@@ -7,9 +13,18 @@ if (
     isset($_GET["token"]) &&
     $_GET["token"] === $_SESSION["user_token"]
 ) {
+    $userId = $_SESSION["user_id"];
     
+    // Clear token in the database   
+    $stmt = mysqli_prepare($conn, "UPDATE users SET remember_token = NULL WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $userId);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+
     session_unset();
     session_destroy();
+    setcookie("remember_token", "", time() - 3600, "/", "", false, true); // Expire the cookie
+    
     header("Location: ../login.php?success=logged_out");
     exit();
 }

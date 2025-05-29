@@ -70,7 +70,11 @@
         <h2><?php echo htmlspecialchars($event['title']); ?></h2>
         <div class="event-actions">
             <a href="update_event.php?id=<?php echo $event_id; ?>" class="btn btn-secondary"><i class="fas fa-edit"></i> Edit Event</a>
-            <a href="../events/delete.php?id=<?php echo $event_id; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this event?')"><i class="fas fa-trash"></i> Delete Event</a>
+           <a href="../events/delete.php?id=<?php echo $event_id; ?>" 
+                class="btn btn-danger" 
+                data-confirm="Are you sure you want to delete this event?">
+                <i class="fas fa-trash"></i> Delete Event
+            </a>
             <a href="view_bookings.php?event_id=<?php echo $event_id; ?>" class="btn btn-primary"><i class="fas fa-ticket-alt"></i> View Bookings</a>
             <a href="events.php" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back to Events</a>
         </div>
@@ -243,7 +247,7 @@
 </div>
 
 </div> <!-- Close dashboard-container -->
-</body>
+
 
 <footer class="main-footer">
         <div class="container">
@@ -280,9 +284,7 @@
         </div>
     </footer>
 
+</body>
 </html>
-
-
-
 
 
