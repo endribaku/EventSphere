@@ -100,7 +100,12 @@ if (isset($_GET['success'])) {
     echo '<div class="alert alert-success">User created successfully.</div>';
 }
 if (isset($_GET['error'])) {
-    echo '<div class="alert alert-danger">Failed to create user. Please check inputs.</div>';
+    if($_GET['error']) {
+        echo '<div class="alert alert-danger">Trying to create existing user.</div>';
+    } else {
+        echo '<div class="alert alert-danger">Failed to create user. Please check inputs.</div>';
+    }
+    
 }
 if (isset($_GET['update_success'])) {
     echo '<div class="alert alert-success">User updated successfully.</div>';
@@ -108,6 +113,8 @@ if (isset($_GET['update_success'])) {
 if (isset($_GET['delete_success'])) {
     echo '<div class="alert alert-success">User deleted successfully.</div>';
 }
+
+
 
 // Display users table
 if ($users->num_rows > 0) {

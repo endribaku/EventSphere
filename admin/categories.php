@@ -20,8 +20,11 @@ if (isset($_GET['status'])) {
         echo '<div class="alert alert-success">Category deleted successfully.</div>';
     } elseif ($_GET['status'] === 'error') {
         echo '<div class="alert alert-danger">An error occurred. Please try again.</div>';
-    }
-}
+    }  elseif ($_GET['status'] === 'exists') {
+      echo '<div class="alert alert-danger">Existing Category.</div>';
+      }
+  }
+
 if(isset($_SESSION["count_error"])) {
   echo '<div class="alert alert-danger">'.$_SESSION["count_error"].'</div>';
   unset($_SESSION["count_error"]);

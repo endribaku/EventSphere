@@ -18,6 +18,12 @@ if (isset($_SESSION["user_id"], $_SESSION["user_role"])) {
             exit();
     }
 }
+
+require_once('php/db.php'); // your database connection
+
+// Fetch site info from database
+$siteResult = mysqli_query($conn, "SELECT * FROM site_info LIMIT 1");
+$site = mysqli_fetch_assoc($siteResult);
 ?>
 
 <!DOCTYPE html>
@@ -25,7 +31,7 @@ if (isset($_SESSION["user_id"], $_SESSION["user_role"])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Evently</title>
+    <title>Login - <?= htmlspecialchars($site['company_name']) ?></title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,7 +42,7 @@ if (isset($_SESSION["user_id"], $_SESSION["user_role"])) {
     <header class="main-header">
         <div class="container">
             <div class="logo">
-                <h1><a href="index.php">Evently</a></h1>
+                <h1><?= htmlspecialchars($site['company_name']) ?></h1>
             </div>
             <nav class="main-nav">
                 <ul>
@@ -80,51 +86,7 @@ if (isset($_SESSION["user_id"], $_SESSION["user_role"])) {
         </div>
     </div>
 
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <h2>Evently</h2>
-                    <p>Discover, book, and manage events with ease.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-                <div class="footer-links">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="index.php#features">Features</a></li>
-                        <li><a href="index.php#events">Events</a></li>
-                        <li><a href="index.php#about">About</a></li>
-                        <li><a href="login.php">Login</a></li>
-                        <li><a href="register.php">Sign Up</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h3>Resources</h3>
-                    <ul>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">FAQs</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Terms of Service</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                    </ul>
-                </div>
-                <div class="footer-contact">
-                    <h3>Contact Us</h3>
-                    <p><i class="fas fa-map-marker-alt"></i> 123 Event Street, City, Country</p>
-                    <p><i class="fas fa-phone"></i> +1 234 567 8900</p>
-                    <p><i class="fas fa-envelope"></i> info@evently.com</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Evently. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+    <?php include_once("footer.php"); ?>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>

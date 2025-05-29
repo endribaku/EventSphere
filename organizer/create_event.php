@@ -188,7 +188,7 @@ if (isset($_POST['submit'])) {
         exit();
     }
     
-    // Handle image upload
+
     $imagePath = null;
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         $imageTmp = $_FILES['image']['tmp_name'];
@@ -201,25 +201,25 @@ if (isset($_POST['submit'])) {
             mkdir('../images/events', 0777, true);
         }
         
-        // Generate unique filename to prevent overwriting
+ 
         $uniqueName = time() . '_' . $imageName;
         $imagePath = '../images/events/' . $uniqueName;
         $fullPath = $imagePath;
 
-        // Validate file type and size
+
         if (!in_array($fileExtension, $allowedExtensions)) {
             $_SESSION['event_error'] = "Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.";
             header("Location: create_event.php");
             exit();
         }
         
-        if ($_FILES['image']['size'] > 5000000) { // 5MB limit
+        if ($_FILES['image']['size'] > 5000000) { 
             $_SESSION['event_error'] = "File is too large. Maximum size is 5MB.";
             header("Location: create_event.php");
             exit();
         }
         
-        // Move the uploaded file
+
         if (!move_uploaded_file($imageTmp, $fullPath)) {
             $_SESSION['event_error'] = "Failed to upload image. Please try again.";
             header("Location: create_event.php");
@@ -227,7 +227,7 @@ if (isset($_POST['submit'])) {
         }
     }
 
-    // Insert event into database
+
     $insertQuery = "INSERT INTO events (organizer_id, title, description, date, venue_id, image, category_id, price)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = mysqli_prepare($conn, $insertQuery);

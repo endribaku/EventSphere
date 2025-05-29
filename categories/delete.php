@@ -25,7 +25,7 @@
     $deleteCategoryStmt = $conn->prepare($deleteCategoryQuery);
     $deleteCategoryStmt->bind_param("i", $category_id);
     if($deleteCategoryStmt->execute()) {
-        header("Location: ../admin/categories.php");
+        header("Location: ../admin/categories.php?status=deleted");
         exit();
     } else {
         die("Failed to delete category");
