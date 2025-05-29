@@ -47,6 +47,16 @@ $event = mysqli_fetch_assoc($event);
 $eventTitle = $event["title"];
 $eventDesc = $event["description"];
 $eventTime = $event["date"];
+
+// checking if tickets are sold so we shoudlnt edit dates and venues
+$bookingCheckQuery = "SELECT COUNT(*) AS sold_tickets FROM bookings WHERE event_id = ?";
+$stmt = mysqli_prepare($conn, $bookingCheckQuery);
+mysqli_stmt_bind_param($stmt, 'i', $event_id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$bookingData = mysqli_fetch_assoc($result);
+$ticketsSold = $bookingData['sold_tickets'];
+
 ?>
 
 <div class="event-update-form">
@@ -71,13 +81,22 @@ $eventTime = $event["date"];
         </div>
 
         <div class="form-group">
-            <label for="date">Event Date</label>
-            <input type="date" name="date" id="date" value="<?php echo $event['date']; ?>" class="form-input" class="form-input" required>
+            <?php if ($ticketsSold > 0): ?>
+            <input type="hidden" name="date" value="<?= $event['date']; ?>">
+            <input type="date" value="<?= $event['date']; ?>" class="form-input" disabled>
+        <?php else: ?>
+            <input type="date" name="date" id="date" value="<?= $event['date']; ?>" class="form-input" required min="<?= date('Y-m-d') ?>">
+        <?php endif; ?>
         </div>
 
         <div class="form-group">
             <label for="venue">Venue</label>
-            <select name="venue" id="venue" class="form-input" required>
+            <?php if ($ticketsSold > 0): ?>
+                <input type="hidden" name="venue" value="<?= $event['venue_id']; ?>">
+                <select class="form-input" disabled>
+            <?php else: ?>  
+            <select name="venue" id="venue" class="form-input" required <?php echo ($ticketsSold > 0) ? 'disabled' : ''; ?>>
+            <?php endif; ?>
                 <?php
                 $venuesQuery = "SELECT * FROM venues";
                 $venuesResult = mysqli_query($conn, $venuesQuery);
@@ -149,41 +168,8 @@ $eventTime = $event["date"];
     </form>
 </div>
 
-<footer class="main-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <h2><?= htmlspecialchars($site['company_name']) ?></h2>
-                    <p><?= htmlspecialchars($site['footer_text']) ?></p>
-                </div>
-                <div class="footer-links">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#events">Events</a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="login.php">Login</a></li>
-                        <li><a href="register.php">Register</a></li>
-                    </ul>
-                </div>
-                <div class="footer-contact">
-                    <h3>Contact Us</h3>
-                    <p><i class="fas fa-envelope"></i> <?= htmlspecialchars($site['email']) ?></p>
-                    <p><i class="fas fa-phone"></i> <?= htmlspecialchars($site['phone']) ?></p>
-                    <div class="social-links">
-                        <a href="<?= htmlspecialchars($site['facebook_link']) ?>"><i class="fab fa-facebook-f"></i></a>
-                        <a href="<?= htmlspecialchars($site['twitter_link']) ?>"><i class="fab fa-twitter"></i></a>
-                        <a href="<?= htmlspecialchars($site['instagram_link']) ?>"><i class="fab fa-instagram"></i></a>
-                        <a href="<?= htmlspecialchars($site['linkedin_link']) ?>"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p><?= htmlspecialchars($site['footer_text']) ?></p>
-            </div>
-        </div>
-</footer>
 
+<?php include_once("../footer.php");?>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const venueSelect = document.getElementById('venue');

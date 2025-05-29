@@ -1,6 +1,6 @@
 <?php
 require_once("../php/db.php");
-require_once("../admin/admin_auth.php"); // your admin session auth check
+require_once("../admin/admin_auth.php"); //admin session auth check
 require_once("event_utils.php");
 
 if (!isset($_GET['id']) || !filter_var($_GET['id'], FILTER_VALIDATE_INT)) {

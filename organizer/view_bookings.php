@@ -139,5 +139,5 @@
 
     <a href="events.php" class="btn btn-primary back-link"><i class="fas fa-arrow-left"></i> Back to Events</a>
 <?php endif; ?>
-
+<?php include_once("../footer.php");?>
  </html>

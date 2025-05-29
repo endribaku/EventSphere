@@ -3,7 +3,18 @@
     require_once("organizer_auth.php");
     require_once("../php/db.php");
     require_once("organizer_header.php");
+
+    if (isset($_GET['status'])) {
+        if ($_GET['status'] === 'created') {
+            echo '<div class="alert alert-success">Event created successfully.</div>';
+        } elseif ($_GET['status'] === 'notcreated') {
+            echo '<div class="alert alert-danger">Failed to create event.</div>';
+        }  elseif ($_GET['status'] === 'overlap') {
+            echo '<div class="alert alert-danger">There is already an event scheduled at this venue on that date. Please choose another date or venue.</div>';
+        }
+    }
 ?>
+
 
 <div class="create-event-container">
     <h2 class="section-title">Create New Event</h2>
@@ -172,8 +183,8 @@ if (isset($_POST['submit'])) {
     $conflictResult = mysqli_stmt_get_result($conflictStmt);
 
     if (mysqli_num_rows($conflictResult) > 0) {
-        $_SESSION['event_error'] = "There is already an event scheduled at this venue on that date. Please choose another date or venue.";
-        header("Location: create_event.php");
+
+        header("Location: create_event.php?status=overlap");
         exit();
     }
     
@@ -225,7 +236,7 @@ if (isset($_POST['submit'])) {
 
     if($result) {
         $_SESSION['event_success'] = "Event created successfully!";
-        header("Location: events.php");
+        header("Location: events.php?status=created");
         exit();
     } else {
         $_SESSION['event_error'] = "Error creating event: " . mysqli_stmt_error($stmt);
@@ -235,40 +246,8 @@ if (isset($_POST['submit'])) {
 }
 ?>
 
-<footer class="main-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <h2><?= htmlspecialchars($site['company_name']) ?></h2>
-                    <p><?= htmlspecialchars($site['footer_text']) ?></p>
-                </div>
-                <div class="footer-links">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#events">Events</a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="login.php">Login</a></li>
-                        <li><a href="register.php">Register</a></li>
-                    </ul>
-                </div>
-                <div class="footer-contact">
-                    <h3>Contact Us</h3>
-                    <p><i class="fas fa-envelope"></i> <?= htmlspecialchars($site['email']) ?></p>
-                    <p><i class="fas fa-phone"></i> <?= htmlspecialchars($site['phone']) ?></p>
-                    <div class="social-links">
-                        <a href="<?= htmlspecialchars($site['facebook_link']) ?>"><i class="fab fa-facebook-f"></i></a>
-                        <a href="<?= htmlspecialchars($site['twitter_link']) ?>"><i class="fab fa-twitter"></i></a>
-                        <a href="<?= htmlspecialchars($site['instagram_link']) ?>"><i class="fab fa-instagram"></i></a>
-                        <a href="<?= htmlspecialchars($site['linkedin_link']) ?>"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p><?= htmlspecialchars($site['footer_text']) ?></p>
-            </div>
-        </div>
-    </footer>
+<?php include_once("../footer.php");?>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

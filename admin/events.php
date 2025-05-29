@@ -288,7 +288,10 @@ if($events->num_rows > 0) {
         // Actions
         echo '<td class="actions">';
         echo '<a href="event_details.php?id=' . $event['id'] . '" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>';
-        echo '<a href="update_event.php?id=' . $event['id'] . '" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>';
+        if ($event['date'] >= date('Y-m-d')) {
+            echo '<a href="update_event.php?id=' . $event['id'] . '" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>';
+        }
+        
         echo '<a href="../events/admin_delete.php?id=' . $event['id'] . '" class="btn btn-sm btn-danger" onclick="return confirm(\'Are you sure you want to delete this event?\')"><i class="fas fa-trash"></i></a>';
         echo '</td>';
         
@@ -320,40 +323,6 @@ if($events->num_rows > 0) {
 
 </div> <!-- Close dashboard-container -->
 </body>
-<footer class="main-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <h2><?= htmlspecialchars($site['company_name']) ?></h2>
-                    <p><?= htmlspecialchars($site['footer_text']) ?></p>
-                </div>
-                <div class="footer-links">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#events">Events</a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="login.php">Login</a></li>
-                        <li><a href="register.php">Register</a></li>
-                    </ul>
-                </div>
-                <div class="footer-contact">
-                    <h3>Contact Us</h3>
-                    <p><i class="fas fa-envelope"></i> <?= htmlspecialchars($site['email']) ?></p>
-                    <p><i class="fas fa-phone"></i> <?= htmlspecialchars($site['phone']) ?></p>
-                    <div class="social-links">
-                        <a href="<?= htmlspecialchars($site['facebook_link']) ?>"><i class="fab fa-facebook-f"></i></a>
-                        <a href="<?= htmlspecialchars($site['twitter_link']) ?>"><i class="fab fa-twitter"></i></a>
-                        <a href="<?= htmlspecialchars($site['instagram_link']) ?>"><i class="fab fa-instagram"></i></a>
-                        <a href="<?= htmlspecialchars($site['linkedin_link']) ?>"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p><?= htmlspecialchars($site['footer_text']) ?></p>
-            </div>
-        </div>
-    </footer>
-
+<?php include_once("../footer.php");?>
 </html>
 
