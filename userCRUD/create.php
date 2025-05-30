@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!empty($name) && !empty($email) && !empty($password) && in_array($role, ['user', 'organizer', 'admin'])) {
 
 
-        // ✅ Check if email exists
+        
         $checkQuery = "SELECT id FROM users WHERE email = ?";
         $checkStmt = $conn->prepare($checkQuery);
         $checkStmt->bind_param("s", $email);

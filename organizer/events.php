@@ -181,7 +181,7 @@ switch ($sort) {
         $filterQuery .= " ORDER BY e.price DESC";
         break;
     default:
-        $filterQuery .= " ORDER BY e.date ASC";
+        $filterQuery .= " ORDER BY e.date DESC";
         break;
 }
 

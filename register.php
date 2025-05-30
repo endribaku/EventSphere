@@ -22,7 +22,6 @@ if (isset($_SESSION["user_id"], $_SESSION["user_role"])) {
 
 require_once('php/db.php'); // your database connection
 
-// Fetch site info from database
 $siteResult = mysqli_query($conn, "SELECT * FROM site_info LIMIT 1");
 $site = mysqli_fetch_assoc($siteResult);
 ?>
@@ -98,20 +97,19 @@ $site = mysqli_fetch_assoc($siteResult);
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // Mobile menu toggle
+
         document.querySelector('.menu-toggle').addEventListener('click', function() {
             document.querySelector('.main-nav').classList.toggle('active');
         });
-        
-        // Create a notification function
+
         function showNotification(message, isError = false) {
-            // Remove any existing notification
+
             const existingNotification = document.querySelector('.notification');
             if (existingNotification) {
                 existingNotification.remove();
             }
             
-            // Create notification element
+
             const notification = document.createElement('div');
             notification.className = `notification ${isError ? 'notification-error' : 'notification-success'}`;
             notification.innerHTML = `
@@ -122,15 +120,15 @@ $site = mysqli_fetch_assoc($siteResult);
                 <button class="notification-close">&times;</button>
             `;
             
-            // Add to DOM
+       
             document.body.appendChild(notification);
             
-            // Add close button functionality
+
             notification.querySelector('.notification-close').addEventListener('click', function() {
                 notification.remove();
             });
             
-            // Auto remove after 5 seconds
+   
             setTimeout(() => {
                 if (document.body.contains(notification)) {
                     notification.remove();
@@ -138,7 +136,7 @@ $site = mysqli_fetch_assoc($siteResult);
             }, 5000);
         }
         
-        // Form validation
+
         function validateRegisterForm() {
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -193,7 +191,6 @@ $site = mysqli_fetch_assoc($siteResult);
             const submitButton = $(this).find('button[type="submit"]');
             const originalText = submitButton.text();
 
-            // Show loading spinner
             submitButton.prop('disabled', true);
             submitButton.html('<i class="fas fa-spinner fa-spin"></i> Creating account...');
 
@@ -228,7 +225,7 @@ $site = mysqli_fetch_assoc($siteResult);
 
         });
     </script>
-    <!-- Place the script at the end of the body for better performance -->
+
     <script src="js/main.js"></script>
 </body>
 </html>
